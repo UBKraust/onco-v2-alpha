@@ -1,193 +1,235 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, CheckCircle } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { CalendarIcon, CheckCircle, Upload } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export default function PatientOnboardingPage() {
+export default function PatientOnboarding() {
+  const searchParams = useSearchParams()
+  const source = searchParams.get("source")
+  const isCallCenter = source === "callcenter"
+
   const [formData, setFormData] = useState({
-    // Section 1: Date Personale
-    prenume: "",
-    numeFamily: "",
+    firstName: "",
+    lastName: "",
     cnp: "",
-    dataNasterii: "",
-    sex: "",
-    statusAsigurare: "",
+    birthDate: "",
+    gender: "",
+    insuranceStatus: "",
     email: "",
-    telefon: "",
-    strada: "",
-    oras: "",
-    judet: "",
-    codPostal: "",
+    phone: "",
+    street: "",
+    city: "",
+    county: "",
+    postalCode: "",
 
-    // Section 2: Date Medicale
-    diagnosticPrincipal: "",
-    dataDiagnostic: "",
-    alergii: "",
-    medicamenteCurente: "",
-    simptome: "",
-    tratamentCurent: "",
-    testGenetic: false,
+    diagnosis: "",
+    diagnosisDate: "",
+    allergies: "",
+    currentMedication: "",
+    symptoms: "",
+    currentTreatment: "",
+    geneticTest: false,
 
-    // Section 3: Contact și Social
-    ocupatie: "",
-    situatieFamiliala: "",
-    limbaPreferata: "",
-    intervalContact: "",
-    observatiiSpeciale: "",
-    numeContact: "",
-    relatieContact: "",
-    telefonContact: "",
-    emailContact: "",
-    adresaContact: "",
+    occupation: "",
+    familyStatus: "",
+    preferredLanguage: "",
+    preferredContactTime: "",
+    specialNotes: "",
 
-    // Section 4: Documente
-    documenteAtasate: "",
+    contactName: "",
+    contactRelation: "",
+    contactPhone: "",
+    contactEmail: "",
+    contactAddress: "",
 
-    // Section 5: Finalizare
-    noteNavigator: "",
+    documents: "",
+
+    navigatorNotes: "",
     gdprConsent: false,
   })
 
-  const [errors, setErrors] = useState<string[]>([])
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }))
+    }
   }
 
-  const fillTestData = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Simulate validation
+    const newErrors: Record<string, boolean> = {}
+
+    // Required fields
+    const requiredFields = ["firstName", "lastName", "cnp", "birthDate", "gender", "phone"]
+    requiredFields.forEach((field) => {
+      if (!formData[field as keyof typeof formData]) {
+        newErrors[field] = true
+      }
+    })
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    // Submit form
+    console.log("Form submitted:", formData)
+    alert("Pacient înregistrat cu succes!")
+  }
+
+  const loadDemoData = () => {
     setFormData({
-      prenume: "Maria",
-      numeFamily: "Popescu",
-      cnp: "2801015123456",
-      dataNasterii: "1980-01-15",
-      sex: "Feminin",
-      statusAsigurare: "CAS",
+      firstName: "Maria",
+      lastName: "Popescu",
+      cnp: "2790315123456",
+      birthDate: "1979-03-15",
+      gender: "Feminin",
+      insuranceStatus: "CAS",
       email: "maria.popescu@email.com",
-      telefon: "0721123456",
-      strada: "Str. Exemplului, Nr. 10",
-      oras: "București",
-      judet: "Ilfov",
-      codPostal: "014523",
-      diagnosticPrincipal: "Cancer mamar invasiv",
-      dataDiagnostic: "2024-01-15",
-      alergii: "Penicilină",
-      medicamenteCurente: "Letrozol, Gabapentin",
-      simptome: "Noduli mamar, Durere localizată",
-      tratamentCurent: "Chimioterapie ACT (Doxil 240)",
-      testGenetic: true,
-      ocupatie: "Profesoară",
-      situatieFamiliala: "Căsătorită, 2 copii",
-      limbaPreferata: "Română",
-      intervalContact: "08:00-17:00",
-      observatiiSpeciale: "Preferă comunicarea prin email",
-      numeContact: "Ion Popescu",
-      relatieContact: "Soț/Soție",
-      telefonContact: "0721654321",
-      emailContact: "ion.popescu@email.com",
-      adresaContact: "Str. Exemplului, Nr. 10, București",
-      documenteAtasate: "buletin_maria.pdf, test_genetic.pdf",
-      noteNavigator: "Pacientă colaborantă, are sprijin familial. Recomandări speciale pentru...",
-      gdprConsent: true,
+      phone: "0721234567",
+      street: "Str. Exemplului",
+      city: "București",
+      county: "Sector 1",
+      postalCode: "012345",
+
+      diagnosis: "Cancer mamar invaziv",
+      diagnosisDate: "2024-01-15",
+      allergies: "Penicilină",
+      currentMedication: "Letrozol 2.5 mg/zi",
+      symptoms: "Dureri moderate, oboseală localizată",
+      currentTreatment: "Chimioterapie AC-T (doză 30%)",
+      geneticTest: true,
+
+      occupation: "Profesoară",
+      familyStatus: "Căsătorită, 2 copii",
+      preferredLanguage: "Română",
+      preferredContactTime: "08:00-17:00",
+      specialNotes: "Preferă comunicare prin email",
+
+      contactName: "Ion Popescu",
+      contactRelation: "Soț",
+      contactPhone: "0731234567",
+      contactEmail: "ion.popescu@email.com",
+      contactAddress: "Str. Exemplului 10, București",
+
+      documents: "buletin_maria.pdf, analize_recente.pdf",
+
+      navigatorNotes: "Pacienta colaborează, are sprijin familial. Recomand suport psihologic.",
+      gdprConsent: false,
     })
   }
 
-  const handleSubmit = () => {
-    const requiredFields = ["prenume", "numeFamily", "cnp", "email", "telefon"]
-    const newErrors = requiredFields.filter((field) => !formData[field as keyof typeof formData])
-
-    if (!formData.gdprConsent) {
-      newErrors.push("gdprConsent")
-    }
-
-    setErrors(newErrors)
-
-    if (newErrors.length === 0) {
-      console.log("Form submitted:", formData)
-      // Handle form submission
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Înregistrare Pacient Nou</h1>
-            <p className="text-gray-600 mt-2">
-              OncoLink - Sistem de management pentru pacienți și gestionarea eficientă
+            <h1 className="text-2xl font-bold text-gray-800">Înregistrare Pacient Nou</h1>
+            <p className="text-sm text-gray-600">
+              Introducere datele necesare pentru gestionarea pacienților eficientă
             </p>
           </div>
-          <Button variant="ghost" onClick={fillTestData} className="text-sm">
+
+          {isCallCenter && (
+            <div className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+              <span className="mr-1">●</span> Onboarding Telefonic
+            </div>
+          )}
+
+          <Button variant="ghost" size="sm" onClick={loadDemoData} className="text-gray-500 hover:text-gray-700">
             Încarcă Date Demo
           </Button>
         </div>
 
-        <div className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 1: Date Personale */}
-          <Card className="rounded-2xl shadow-sm bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold">
+          <Card className="rounded-2xl shadow-sm overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold mr-3">
                   1
                 </div>
-                Date Personale
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-800">Date Personale</h2>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="prenume">Prenume *</Label>
+                  <Label htmlFor="firstName" className={cn(errors.firstName && "text-red-500")}>
+                    Prenume <span className="text-red-500">*</span>
+                  </Label>
                   <Input
-                    id="prenume"
-                    value={formData.prenume}
-                    onChange={(e) => handleInputChange("prenume", e.target.value)}
-                    className={errors.includes("prenume") ? "border-red-500" : ""}
-                    placeholder="Introduceți prenumele"
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => handleChange("firstName", e.target.value)}
+                    className={cn(errors.firstName && "border-red-500")}
+                    placeholder={errors.firstName ? "Câmp obligatoriu" : ""}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="numeFamily">Nume de Familie *</Label>
+                  <Label htmlFor="lastName" className={cn(errors.lastName && "text-red-500")}>
+                    Nume de Familie <span className="text-red-500">*</span>
+                  </Label>
                   <Input
-                    id="numeFamily"
-                    value={formData.numeFamily}
-                    onChange={(e) => handleInputChange("numeFamily", e.target.value)}
-                    className={errors.includes("numeFamily") ? "border-red-500" : ""}
-                    placeholder="Introduceți numele de familie"
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => handleChange("lastName", e.target.value)}
+                    className={cn(errors.lastName && "border-red-500")}
+                    placeholder={errors.lastName ? "Câmp obligatoriu" : ""}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="cnp">CNP (Cod Numeric Personal) *</Label>
+                  <Label htmlFor="cnp" className={cn(errors.cnp && "text-red-500")}>
+                    CNP (Cod Numeric Personal) <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="cnp"
                     value={formData.cnp}
-                    onChange={(e) => handleInputChange("cnp", e.target.value)}
-                    className={errors.includes("cnp") ? "border-red-500" : ""}
-                    placeholder="1234567890123"
+                    onChange={(e) => handleChange("cnp", e.target.value)}
+                    className={cn(errors.cnp && "border-red-500")}
+                    placeholder={errors.cnp ? "Câmp obligatoriu" : ""}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="dataNasterii">Data Nașterii</Label>
-                  <Input
-                    id="dataNasterii"
-                    type="date"
-                    value={formData.dataNasterii}
-                    onChange={(e) => handleInputChange("dataNasterii", e.target.value)}
-                  />
+                  <Label htmlFor="birthDate" className={cn(errors.birthDate && "text-red-500")}>
+                    Data Nașterii <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="birthDate"
+                      type="date"
+                      value={formData.birthDate}
+                      onChange={(e) => handleChange("birthDate", e.target.value)}
+                      className={cn(errors.birthDate && "border-red-500", "pr-10")}
+                    />
+                    <CalendarIcon className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+                  </div>
                 </div>
+
                 <div>
-                  <Label htmlFor="sex">Sex</Label>
-                  <Select value={formData.sex} onValueChange={(value) => handleInputChange("sex", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selectați sexul" />
+                  <Label htmlFor="gender" className={cn(errors.gender && "text-red-500")}>
+                    Sex <span className="text-red-500">*</span>
+                  </Label>
+                  <Select value={formData.gender} onValueChange={(value) => handleChange("gender", value)}>
+                    <SelectTrigger className={cn(errors.gender && "border-red-500")}>
+                      <SelectValue placeholder={errors.gender ? "Câmp obligatoriu" : "Selectează"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Masculin">Masculin</SelectItem>
@@ -196,14 +238,15 @@ export default function PatientOnboardingPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
-                  <Label htmlFor="statusAsigurare">Statut Asigurare Medicală</Label>
+                  <Label htmlFor="insuranceStatus">Statut Asigurare Medicală</Label>
                   <Select
-                    value={formData.statusAsigurare}
-                    onValueChange={(value) => handleInputChange("statusAsigurare", value)}
+                    value={formData.insuranceStatus}
+                    onValueChange={(value) => handleChange("insuranceStatus", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selectați tipul asigurării" />
+                      <SelectValue placeholder="Selectează" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="CAS">CAS</SelectItem>
@@ -212,51 +255,57 @@ export default function PatientOnboardingPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={errors.includes("email") ? "border-red-500" : ""}
-                    placeholder="exemplu@email.com"
+                    onChange={(e) => handleChange("email", e.target.value)}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="telefon">Telefon *</Label>
+                  <Label htmlFor="phone" className={cn(errors.phone && "text-red-500")}>
+                    Telefon <span className="text-red-500">*</span>
+                  </Label>
                   <Input
-                    id="telefon"
-                    value={formData.telefon}
-                    onChange={(e) => handleInputChange("telefon", e.target.value)}
-                    className={errors.includes("telefon") ? "border-red-500" : ""}
-                    placeholder="0721123456"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                    className={cn(errors.phone && "border-red-500")}
+                    placeholder={errors.phone ? "Câmp obligatoriu" : ""}
                   />
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <Label>Adresă</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="mt-4">
+                <Label htmlFor="address">Adresă</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                   <Input
-                    placeholder="Strada și numărul"
-                    value={formData.strada}
-                    onChange={(e) => handleInputChange("strada", e.target.value)}
+                    id="street"
+                    value={formData.street}
+                    onChange={(e) => handleChange("street", e.target.value)}
+                    placeholder="Stradă, Bloc, Ap."
                   />
                   <Input
-                    placeholder="Orașul"
-                    value={formData.oras}
-                    onChange={(e) => handleInputChange("oras", e.target.value)}
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleChange("city", e.target.value)}
+                    placeholder="Oraș"
                   />
                   <Input
-                    placeholder="Județul"
-                    value={formData.judet}
-                    onChange={(e) => handleInputChange("judet", e.target.value)}
+                    id="county"
+                    value={formData.county}
+                    onChange={(e) => handleChange("county", e.target.value)}
+                    placeholder="Județ/Sector"
                   />
                   <Input
-                    placeholder="Cod poștal"
-                    value={formData.codPostal}
-                    onChange={(e) => handleInputChange("codPostal", e.target.value)}
+                    id="postalCode"
+                    value={formData.postalCode}
+                    onChange={(e) => handleChange("postalCode", e.target.value)}
+                    placeholder="Cod Poștal"
                   />
                 </div>
               </div>
@@ -264,132 +313,139 @@ export default function PatientOnboardingPage() {
           </Card>
 
           {/* Section 2: Date Medicale */}
-          <Card className="rounded-2xl shadow-sm bg-purple-50">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold">
+          <Card className="rounded-2xl shadow-sm overflow-hidden bg-purple-50">
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3">
                   2
                 </div>
-                Date Medicale
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-800">Date Medicale</h2>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="diagnosticPrincipal">Diagnostic Principal</Label>
+                  <Label htmlFor="diagnosis">Diagnostic Principal</Label>
                   <Input
-                    id="diagnosticPrincipal"
-                    value={formData.diagnosticPrincipal}
-                    onChange={(e) => handleInputChange("diagnosticPrincipal", e.target.value)}
-                    placeholder="Cancer mamar invasiv"
+                    id="diagnosis"
+                    value={formData.diagnosis}
+                    onChange={(e) => handleChange("diagnosis", e.target.value)}
+                    placeholder="ex: Cancer mamar invaziv"
+                    className="placeholder:text-red-300"
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="dataDiagnostic">Data Diagnostic (Opțional)</Label>
+                  <Label htmlFor="diagnosisDate">Data Diagnostic</Label>
+                  <div className="relative">
+                    <Input
+                      id="diagnosisDate"
+                      type="date"
+                      value={formData.diagnosisDate}
+                      onChange={(e) => handleChange("diagnosisDate", e.target.value)}
+                      className="pr-10"
+                    />
+                    <CalendarIcon className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="allergies">Alergii</Label>
                   <Input
-                    id="dataDiagnostic"
-                    type="date"
-                    value={formData.dataDiagnostic}
-                    onChange={(e) => handleInputChange("dataDiagnostic", e.target.value)}
+                    id="allergies"
+                    value={formData.allergies}
+                    onChange={(e) => handleChange("allergies", e.target.value)}
+                    placeholder="separate prin virgulă"
+                    className="placeholder:text-red-300"
                   />
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="alergii">Alergii Cunoscute (Opțional)</Label>
-                <Input
-                  id="alergii"
-                  value={formData.alergii}
-                  onChange={(e) => handleInputChange("alergii", e.target.value)}
-                  placeholder="Introduceți alergiile separate prin virgulă"
-                  className="text-red-600 placeholder:text-red-400"
-                />
-              </div>
+                <div>
+                  <Label htmlFor="currentMedication">Medicamente Curente</Label>
+                  <Input
+                    id="currentMedication"
+                    value={formData.currentMedication}
+                    onChange={(e) => handleChange("currentMedication", e.target.value)}
+                    placeholder="ex: Letrozol 2.5 mg/zi"
+                    className="placeholder:text-red-300"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="medicamenteCurente">Medicamente Curente (Opțional)</Label>
-                <Input
-                  id="medicamenteCurente"
-                  value={formData.medicamenteCurente}
-                  onChange={(e) => handleInputChange("medicamenteCurente", e.target.value)}
-                  placeholder="Introduceți medicamentele separate prin virgulă"
-                  className="text-red-600 placeholder:text-red-400"
-                />
-              </div>
+                <div className="col-span-2">
+                  <Label htmlFor="symptoms">Simptome și Diagnostice Asociate</Label>
+                  <Input
+                    id="symptoms"
+                    value={formData.symptoms}
+                    onChange={(e) => handleChange("symptoms", e.target.value)}
+                    placeholder="ex: Dureri moderate, oboseală"
+                    className="placeholder:text-red-300"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="simptome">Simptome și Diagnostice Asociate (Opțional)</Label>
-                <Input
-                  id="simptome"
-                  value={formData.simptome}
-                  onChange={(e) => handleInputChange("simptome", e.target.value)}
-                  placeholder="Introduceți simptomele separate prin virgulă"
-                  className="text-red-600 placeholder:text-red-400"
-                />
-              </div>
+                <div className="col-span-2">
+                  <Label htmlFor="currentTreatment">Tratament Curent</Label>
+                  <Textarea
+                    id="currentTreatment"
+                    value={formData.currentTreatment}
+                    onChange={(e) => handleChange("currentTreatment", e.target.value)}
+                    placeholder="Descrieți tratamentul curent"
+                    className="placeholder:text-red-300"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="tratamentCurent">Tratament Curent (Opțional)</Label>
-                <Textarea
-                  id="tratamentCurent"
-                  value={formData.tratamentCurent}
-                  onChange={(e) => handleInputChange("tratamentCurent", e.target.value)}
-                  placeholder="Descrieți tratamentul curent"
-                  className="text-red-600 placeholder:text-red-400"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2 p-4 bg-green-50 rounded-lg">
-                <Switch
-                  id="testGenetic"
-                  checked={formData.testGenetic}
-                  onCheckedChange={(checked) => handleInputChange("testGenetic", checked)}
-                />
-                <Label htmlFor="testGenetic" className="text-sm">
-                  Test Genetic Efectuat - Bifați dacă există teste genetice efectuate (ex: BRCA)
-                </Label>
+                <div className="col-span-2 flex items-center space-x-2">
+                  <Switch
+                    id="geneticTest"
+                    checked={formData.geneticTest}
+                    onCheckedChange={(checked) => handleChange("geneticTest", checked)}
+                  />
+                  <Label htmlFor="geneticTest" className="text-sm">
+                    Test Genetic Efectuat{" "}
+                    <span className="text-xs text-gray-500">
+                      (Bifați dacă există teste genetice efectuate ex: BRCA)
+                    </span>
+                  </Label>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Section 3: Contact și Social */}
-          <Card className="rounded-2xl shadow-sm bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-semibold">
+          <Card className="rounded-2xl shadow-sm overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mr-3">
                   3
                 </div>
-                Contact și Social
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+                <h2 className="text-xl font-semibold text-gray-800">Contact și Social</h2>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="ocupatie">Ocupație / Profesie (Opțional)</Label>
+                  <Label htmlFor="occupation">Ocupație / Profesie</Label>
                   <Input
-                    id="ocupatie"
-                    value={formData.ocupatie}
-                    onChange={(e) => handleInputChange("ocupatie", e.target.value)}
-                    placeholder="Profesoară"
+                    id="occupation"
+                    value={formData.occupation}
+                    onChange={(e) => handleChange("occupation", e.target.value)}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="situatieFamiliala">Situație Familială (Opțional)</Label>
+                  <Label htmlFor="familyStatus">Situație Familială</Label>
                   <Input
-                    id="situatieFamiliala"
-                    value={formData.situatieFamiliala}
-                    onChange={(e) => handleInputChange("situatieFamiliala", e.target.value)}
-                    placeholder="Căsătorită, 2 copii"
+                    id="familyStatus"
+                    value={formData.familyStatus}
+                    onChange={(e) => handleChange("familyStatus", e.target.value)}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="limbaPreferata">Limba Preferată pentru Comunicare</Label>
+                  <Label htmlFor="preferredLanguage">Limba preferată pentru comunicare</Label>
                   <Select
-                    value={formData.limbaPreferata}
-                    onValueChange={(value) => handleInputChange("limbaPreferata", value)}
+                    value={formData.preferredLanguage}
+                    onValueChange={(value) => handleChange("preferredLanguage", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selectați limba" />
+                      <SelectValue placeholder="Selectează" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Română">Română</SelectItem>
@@ -398,196 +454,174 @@ export default function PatientOnboardingPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
-                  <Label htmlFor="intervalContact">Interval Preferat de Contact (Opțional)</Label>
+                  <Label htmlFor="preferredContactTime">Interval preferat de contact</Label>
                   <Select
-                    value={formData.intervalContact}
-                    onValueChange={(value) => handleInputChange("intervalContact", value)}
+                    value={formData.preferredContactTime}
+                    onValueChange={(value) => handleChange("preferredContactTime", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selectați intervalul" />
+                      <SelectValue placeholder="Selectează" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="dimineața">Dimineața</SelectItem>
+                      <SelectItem value="dimineață">Dimineață</SelectItem>
                       <SelectItem value="08:00-17:00">08:00-17:00</SelectItem>
                       <SelectItem value="seara">Seara</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="col-span-2">
+                  <Label htmlFor="specialNotes">Observații speciale pacient</Label>
+                  <Textarea
+                    id="specialNotes"
+                    value={formData.specialNotes}
+                    onChange={(e) => handleChange("specialNotes", e.target.value)}
+                    placeholder="Notițe speciale despre pacient"
+                  />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="observatiiSpeciale">Observații Speciale Pacient</Label>
-                <Textarea
-                  id="observatiiSpeciale"
-                  value={formData.observatiiSpeciale}
-                  onChange={(e) => handleInputChange("observatiiSpeciale", e.target.value)}
-                  placeholder="Notele observațiilor speciale și întrebări"
-                />
-              </div>
+              <div className="mt-6 border-t pt-4">
+                <h3 className="font-medium text-gray-800 mb-3">Persoană de Contact</h3>
 
-              {/* Persoană de Contact Subsection */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Persoană de Contact (Aparținător)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="numeContact">Nume Complet Aparținător</Label>
+                    <Label htmlFor="contactName">Nume complet</Label>
                     <Input
-                      id="numeContact"
-                      value={formData.numeContact}
-                      onChange={(e) => handleInputChange("numeContact", e.target.value)}
-                      placeholder="Ion Popescu"
+                      id="contactName"
+                      value={formData.contactName}
+                      onChange={(e) => handleChange("contactName", e.target.value)}
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="relatieContact">Relația cu Pacientul</Label>
+                    <Label htmlFor="contactRelation">Relație</Label>
                     <Input
-                      id="relatieContact"
-                      value={formData.relatieContact}
-                      onChange={(e) => handleInputChange("relatieContact", e.target.value)}
-                      placeholder="Soț/Soție"
+                      id="contactRelation"
+                      value={formData.contactRelation}
+                      onChange={(e) => handleChange("contactRelation", e.target.value)}
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="telefonContact">Telefon Aparținător</Label>
+                    <Label htmlFor="contactPhone">Telefon</Label>
                     <Input
-                      id="telefonContact"
-                      value={formData.telefonContact}
-                      onChange={(e) => handleInputChange("telefonContact", e.target.value)}
-                      placeholder="0721123456"
+                      id="contactPhone"
+                      value={formData.contactPhone}
+                      onChange={(e) => handleChange("contactPhone", e.target.value)}
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="emailContact">Email Aparținător (Opțional)</Label>
+                    <Label htmlFor="contactEmail">Email</Label>
                     <Input
-                      id="emailContact"
-                      type="email"
-                      value={formData.emailContact}
-                      onChange={(e) => handleInputChange("emailContact", e.target.value)}
-                      placeholder="ion.popescu@email.com"
+                      id="contactEmail"
+                      value={formData.contactEmail}
+                      onChange={(e) => handleChange("contactEmail", e.target.value)}
                     />
                   </div>
-                </div>
-                <div className="mt-4">
-                  <Label htmlFor="adresaContact">Adresă Aparținător (Opțional)</Label>
-                  <Input
-                    id="adresaContact"
-                    value={formData.adresaContact}
-                    onChange={(e) => handleInputChange("adresaContact", e.target.value)}
-                    placeholder="Str. Exemplului, Nr. 10, București"
-                  />
+
+                  <div className="col-span-2">
+                    <Label htmlFor="contactAddress">Adresă</Label>
+                    <Input
+                      id="contactAddress"
+                      value={formData.contactAddress}
+                      onChange={(e) => handleChange("contactAddress", e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Section 4: Documente */}
-          <Card className="rounded-2xl shadow-sm bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-semibold">
+          <Card className="rounded-2xl shadow-sm overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold mr-3">
                   4
                 </div>
-                Documente
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Încărcați documentele medicale relevante pentru pacient, separate prin virgulă. Upload și fișiere se fac
-                în modulul "Dosar Medical Digital"
-              </p>
-
-              {/* Drag and Drop Area */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-lg font-medium text-gray-700 mb-2">Simulare Drag & Drop pentru fișiere</p>
-                <p className="text-sm text-gray-500">
-                  Funcționalitatea de upload va fi în modulul "Dosar Medical Digital"
-                </p>
+                <h2 className="text-xl font-semibold text-gray-800">Documente</h2>
               </div>
 
-              <div>
-                <Label htmlFor="documenteAtasate">Documente Medicale Inițiale (Opțional)</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <div className="flex flex-col items-center justify-center">
+                  <Upload className="h-10 w-10 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 mb-1">
+                    Încărcați documentele medicale (bilete trimitere de pacient, analize etc)
+                  </p>
+                  <p className="text-xs text-gray-500">Upload și afișare se face în modulul "Dosar Medical Digital"</p>
+
+                  <Button variant="outline" size="sm" className="mt-4">
+                    Simulare "Drag & Drop"
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Label htmlFor="documents">Documente Medicale Inițiale</Label>
                 <Textarea
-                  id="documenteAtasate"
-                  value={formData.documenteAtasate}
-                  onChange={(e) => handleInputChange("documenteAtasate", e.target.value)}
-                  placeholder="buletin_maria.pdf, test_genetic.pdf"
-                  className="bg-gray-50"
+                  id="documents"
+                  value={formData.documents}
+                  onChange={(e) => handleChange("documents", e.target.value)}
+                  placeholder="Listați documentele atașate"
+                  className="h-20"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Section 5: Finalizare și Consimțământ */}
-          <Card className="rounded-2xl shadow-sm bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-semibold">
+          <Card className="rounded-2xl shadow-sm overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold mr-3">
                   5
                 </div>
-                Finalizare și Consimțământ
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+                <h2 className="text-xl font-semibold text-gray-800">Finalizare și Consimțământ</h2>
+              </div>
+
               <div>
-                <Label htmlFor="noteNavigator">Note Inițiale Navigator (Opțional)</Label>
+                <Label htmlFor="navigatorNotes">Notele Inițiale Navigator</Label>
                 <Textarea
-                  id="noteNavigator"
-                  value={formData.noteNavigator}
-                  onChange={(e) => handleInputChange("noteNavigator", e.target.value)}
-                  placeholder="Pacientă colaborantă, are sprijin familial. Recomandări speciale pentru..."
-                  rows={4}
+                  id="navigatorNotes"
+                  value={formData.navigatorNotes}
+                  onChange={(e) => handleChange("navigatorNotes", e.target.value)}
+                  placeholder="Adăugați notițe inițiale despre pacient"
+                  className="h-24"
                 />
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-700 mb-4">
-                  Acceptă să citit și să vă veți conforma cu privire la consimțământ:
-                </p>
-
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="gdprConsent"
-                    checked={formData.gdprConsent}
-                    onCheckedChange={(checked) => handleInputChange("gdprConsent", checked as boolean)}
-                    className={errors.includes("gdprConsent") ? "border-red-500" : ""}
-                  />
-                  <Label htmlFor="gdprConsent" className="text-sm leading-relaxed">
-                    <strong>Consimțământ Prelucrare Date (GDPR)</strong>
-                    <br />
-                    Confirm că am citit și sunt de acord cu Politica de Confidențialitate și Termenii Serviciului.
-                    Datele mele vor fi prelucrate în scopul îngrijirii medicale și comunicării cu echipa medicală.
-                    Înțeleg că pot retrage consimțământul în orice moment.
-                  </Label>
-                </div>
+              <div className="flex items-start space-x-2 mt-4">
+                <Checkbox
+                  id="gdprConsent"
+                  checked={formData.gdprConsent}
+                  onCheckedChange={(checked) => handleChange("gdprConsent", checked === true)}
+                />
+                <Label htmlFor="gdprConsent" className="text-sm">
+                  Sunt de acord cu{" "}
+                  <a href="#" className="text-blue-600 hover:underline">
+                    Politica de Confidențialitate
+                  </a>{" "}
+                  și{" "}
+                  <a href="#" className="text-blue-600 hover:underline">
+                    Termenii Serviciului
+                  </a>
+                  . Datele vor fi utilizate doar pentru scopurile medicale declarate.
+                </Label>
               </div>
 
-              <Button
-                onClick={handleSubmit}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-semibold rounded-xl"
-                size="lg"
-              >
-                <CheckCircle className="mr-2 h-5 w-5" />
-                Înregistrează Pacientul
-              </Button>
-
-              {errors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-red-800 font-medium">Vă rugăm să completați câmpurile obligatorii:</p>
-                  <ul className="text-red-700 text-sm mt-2 list-disc list-inside">
-                    {errors.includes("prenume") && <li>Prenume</li>}
-                    {errors.includes("numeFamily") && <li>Nume de Familie</li>}
-                    {errors.includes("cnp") && <li>CNP</li>}
-                    {errors.includes("email") && <li>Email</li>}
-                    {errors.includes("telefon") && <li>Telefon</li>}
-                    {errors.includes("gdprConsent") && <li>Consimțământ GDPR</li>}
-                  </ul>
-                </div>
-              )}
+              <div className="mt-6 flex justify-end">
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-6">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Înregistrează Pacientul
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        </div>
+        </form>
       </div>
     </div>
   )

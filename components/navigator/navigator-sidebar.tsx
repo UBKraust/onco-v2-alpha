@@ -11,6 +11,7 @@ import {
   Activity,
   Clock,
   Target,
+  Phone,
 } from "lucide-react"
 import {
   Sidebar,
@@ -47,6 +48,13 @@ const navigatorRoutes = [
     title: "Mesaje",
     url: "/navigator/messages",
     icon: MessageSquare,
+  },
+  {
+    title: "Onboarding Telefonic",
+    url: "/patient/onboarding?source=callcenter",
+    icon: Phone,
+    badge: "Call Center",
+    description: "Înregistrare pacienți prin telefon",
   },
   {
     title: "Alerte",
