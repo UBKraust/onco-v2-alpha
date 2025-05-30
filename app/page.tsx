@@ -33,7 +33,9 @@ export default function HomePage() {
             <Link href="/contact" className="text-gray-600 hover:text-gray-900">
               Contact
             </Link>
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6">PROGRAMARE</Button>
+            <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white px-6">
+              <Link href="/patient/onboarding">PROGRAMARE</Link>
+            </Button>
           </nav>
         </div>
       </header>
