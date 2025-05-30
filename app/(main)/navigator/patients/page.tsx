@@ -1,11 +1,15 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Filter, UserPlus, Eye, MessageSquare } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function PatientsListPage() {
+  const router = useRouter()
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -75,7 +79,11 @@ export default function PatientsListPage() {
                 adherence: 95,
               },
             ].map((patient, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => router.push(`/navigator/patients/${index + 1}/details`)}
+              >
                 <div className="flex items-center space-x-4">
                   <Avatar>
                     <AvatarImage src={`/placeholder-user-${index + 1}.jpg`} />
@@ -124,8 +132,12 @@ export default function PatientsListPage() {
                     <p className="text-xs text-muted-foreground mt-1">Aderență: {patient.adherence}%</p>
                   </div>
 
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                  <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/navigator/patients/${index + 1}/details`)}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="sm">
