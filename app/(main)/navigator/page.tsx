@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Users, Calendar, TrendingUp, AlertTriangle } from "lucide-react"
+import QuickActionsCard from "@/components/ui/quick-actions-card"
 
 export default function NavigatorDashboardPage() {
   return (
@@ -56,6 +57,8 @@ export default function NavigatorDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <QuickActionsCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
