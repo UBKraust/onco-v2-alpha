@@ -84,6 +84,64 @@ const mockNavigatorTasks: NavigatorTask[] = [
     status: "pending",
     assignedBy: "Dr. Emily Carter",
   },
+  {
+    id: "task-002",
+    title: "Programare control",
+    description: "Programează consultația de control pentru săptămâna viitoare",
+    patientId: "2",
+    patientName: "Ion Georgescu",
+    priority: "medium",
+    category: "scheduling",
+    dueDate: "2024-11-12 10:00",
+    estimatedDuration: 15,
+    status: "in-progress",
+    assignedBy: "Dr. Sarah Johnson",
+  },
+  {
+    id: "task-003",
+    title: "Actualizare plan tratament",
+    description: "Revizuiește și actualizează planul de tratament",
+    patientId: "3",
+    patientName: "Ana Dumitrescu",
+    priority: "high",
+    category: "treatment",
+    dueDate: "2024-11-10 14:00",
+    estimatedDuration: 45,
+    status: "overdue",
+    assignedBy: "Dr. Emily Carter",
+  },
+]
+
+// Adaugă și mai multe alerte mock
+const additionalMockAlerts: PatientAlert[] = [
+  {
+    id: "alert-002",
+    patientId: "2",
+    patientName: "Ion Georgescu",
+    type: "warning",
+    category: "medication",
+    title: "Aderență medicație scăzută",
+    description: "Pacientul a ratat 2 doze consecutive în ultimele 3 zile.",
+    timestamp: "2024-11-10 14:20",
+    isRead: false,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 1,
+  },
+  {
+    id: "alert-003",
+    patientId: "3",
+    patientName: "Ana Dumitrescu",
+    type: "info",
+    category: "appointment",
+    title: "Programare confirmată",
+    description: "Pacientul a confirmat programarea pentru mâine la 10:00.",
+    timestamp: "2024-11-10 16:45",
+    isRead: true,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 0,
+  },
 ]
 
 // Mock Navigator Data
@@ -125,7 +183,7 @@ const mockPerformanceMetrics: PerformanceMetrics = {
 export function useNavigatorData() {
   const [navigator] = useState<Navigator>(mockNavigator)
   const [patients] = useState<PatientSummary[]>(mockPatientSummaries)
-  const [alerts, setAlerts] = useState<PatientAlert[]>(mockPatientAlerts)
+  const [alerts, setAlerts] = useState<PatientAlert[]>([...mockPatientAlerts, ...additionalMockAlerts])
   const [tasks, setTasks] = useState<NavigatorTask[]>(mockNavigatorTasks)
   const [performanceMetrics] = useState<PerformanceMetrics>(mockPerformanceMetrics)
 
