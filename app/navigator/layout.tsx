@@ -1,0 +1,22 @@
+import type React from "react"
+import { NavigatorSidebar } from "@/components/navigator/navigator-sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
+
+export default function NavigatorLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-blue-50 via-background to-blue-50/50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+        <NavigatorSidebar />
+        <div className="flex-1 flex flex-col">
+          <main className="flex-1 p-6 overflow-auto bg-gray-50/50 dark:bg-transparent">
+            <div className="max-w-7xl mx-auto">{children}</div>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  )
+}
