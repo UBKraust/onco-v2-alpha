@@ -70,7 +70,7 @@ const patientNavItems = [
 const navigatorNavItems = [
   {
     title: "Dashboard",
-    href: "/navigator",
+    href: "/navigator-dashboard",
     icon: Home,
     badge: null,
   },
