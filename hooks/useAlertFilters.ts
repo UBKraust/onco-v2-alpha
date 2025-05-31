@@ -1,71 +1,78 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useMemo } from "react"
 
 export interface AlertFilters {
+  searchTerm: string
   type: string[]
   category: string[]
-  showResolved: boolean
-  showRead: boolean
-  searchTerm: string
   dateRange: {
     from: Date | null
     to: Date | null
   }
+  showResolved: boolean
+  showRead: boolean
+  assignedTo: string[]
+  escalationLevel: number | null
+}
+
+const initialFilters: AlertFilters = {
+  searchTerm: "",
+  type: [],
+  category: [],
+  dateRange: {
+    from: null,
+    to: null,
+  },
+  showResolved: false,
+  showRead: true,
+  assignedTo: [],
+  escalationLevel: null,
 }
 
 export function useAlertFilters() {
-  const [filters, setFilters] = useState<AlertFilters>({
-    type: [],
-    category: [],
-    showResolved: true,
-    showRead: true,
-    searchTerm: "",
-    dateRange: {
-      from: null,
-      to: null,
-    },
-  })
+  const [filters, setFilters] = useState<AlertFilters>(initialFilters)
+  const [sortBy, setSortBy] = useState("timestamp")
+  const [sortOrder, setSortOrder] = useState("desc")
 
-  const [sortBy, setSortBy] = useState<"timestamp" | "priority" | "patient">("timestamp")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-
-  const updateFilter = useCallback((key: keyof AlertFilters, value: any) => {
+  const updateFilter = (key: keyof AlertFilters, value: any) => {
     setFilters((prev) => ({
       ...prev,
       [key]: value,
     }))
-  }, [])
+  }
 
-  const toggleFilterValue = useCallback((key: "type" | "category", value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: prev[key].includes(value) ? prev[key].filter((v) => v !== value) : [...prev[key], value],
-    }))
-  }, [])
+  const toggleFilterValue = (key: "type" | "category" | "assignedTo", value: string) => {
+    setFilters((prev) => {
+      const currentValues = prev[key] as string[]
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter((v) => v !== value)
+        : [...currentValues, value]
 
-  const clearFilters = useCallback(() => {
-    setFilters({
-      type: [],
-      category: [],
-      showResolved: true,
-      showRead: true,
-      searchTerm: "",
-      dateRange: {
-        from: null,
-        to: null,
-      },
+      return {
+        ...prev,
+        [key]: newValues,
+      }
     })
-  }, [])
+  }
 
-  const hasActiveFilters =
-    filters.type.length > 0 ||
-    filters.category.length > 0 ||
-    !filters.showResolved ||
-    !filters.showRead ||
-    filters.searchTerm.length > 0 ||
-    filters.dateRange.from ||
-    filters.dateRange.to
+  const clearFilters = () => {
+    setFilters(initialFilters)
+  }
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.searchTerm !== "" ||
+      filters.type.length > 0 ||
+      filters.category.length > 0 ||
+      filters.dateRange.from !== null ||
+      filters.dateRange.to !== null ||
+      !filters.showRead ||
+      filters.showResolved ||
+      filters.assignedTo.length > 0 ||
+      filters.escalationLevel !== null
+    )
+  }, [filters])
 
   return {
     filters,

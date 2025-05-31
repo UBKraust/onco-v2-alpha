@@ -4,6 +4,14 @@
 
 A comprehensive medical dashboard designed for oncology patient management, featuring role-based interfaces for Patients, Navigators, and Administrators. Built with Next.js 14+, React, TypeScript, Tailwind CSS, and shadcn/ui components.
 
+## ⚠️ Reguli pentru lucrul în V0.dev
+
+- Nu modificați componente globale (`layout.tsx`, `app/globals.css`, etc.) fără aprobare.
+- Lucrați strict în scope-ul paginii sau al componentei (ex: `/patients/`, `/patients/[id]/`).
+- Pentru orice modificare ce afectează meniul global, headerul sau structura generală, creați un ticket separat pentru review de echipă.
+- Toate componentele custom pentru secțiuni locale se găsesc în `components/patients/`.
+- Pentru reguli complete, consultați [rules.md](./rules.md).
+
 ## 🏗️ Architecture
 
 ### Project Structure
@@ -320,6 +328,3 @@ For technical support or questions:
 ---
 
 **Built with ❤️ for better patient care**
-\`\`\`
-
-This comprehensive markdown documentation covers all aspects of the medical dashboard project, from architecture and implementation details to usage guidelines and future enhancements. It serves as both a technical reference and user guide for the system.

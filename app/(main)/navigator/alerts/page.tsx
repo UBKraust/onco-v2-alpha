@@ -1,13 +1,12 @@
 "use client"
-
-import { useRouter } from "next/navigation"
 import { AlertsManagement } from "@/components/navigator/alerts-management"
+import { useRouter } from "next/navigation"
 
-export default function NavigatorAlertsPage() {
+export default function AlertsPage() {
   const router = useRouter()
 
   const handleSelectPatient = (patientId: string) => {
-    router.push(`/navigator/patients/${patientId}/details`)
+    router.push(`/navigator/patients/${patientId}`)
   }
 
   return (

@@ -65,7 +65,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-sync-external-store": "latest",
     "vaul": "^0.9.6",
-    "zod": "^3.24.1",
+    "zod": "latest",
     "zustand": "latest"
   },
   "devDependencies": {

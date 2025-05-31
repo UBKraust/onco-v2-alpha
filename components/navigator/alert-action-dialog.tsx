@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -12,9 +14,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, ArrowUp, Phone, MessageSquare, AlertTriangle } from "lucide-react"
+import {
+  AlertTriangle,
+  Phone,
+  MessageSquare,
+  CheckCircle,
+  ArrowUp,
+  Clock,
+  User,
+  Calendar,
+  FileText,
+  Send,
+} from "lucide-react"
 import type { PatientAlert } from "@/types/navigator"
 
 interface AlertActionDialogProps {
@@ -36,211 +47,279 @@ export function AlertActionDialog({
   onCall,
   onMessage,
 }: AlertActionDialogProps) {
+  const [activeTab, setActiveTab] = useState<"details" | "resolve" | "message" | "escalate">("details")
   const [resolutionNote, setResolutionNote] = useState("")
   const [messageText, setMessageText] = useState("")
-  const [actionType, setActionType] = useState<"resolve" | "escalate" | "call" | "message">("resolve")
+  const [escalationReason, setEscalationReason] = useState("")
+  const [escalationTo, setEscalationTo] = useState("")
 
   if (!alert) return null
 
-  const handleAction = () => {
-    switch (actionType) {
-      case "resolve":
-        if (resolutionNote.trim()) {
-          onResolve(alert.id, resolutionNote)
-          setResolutionNote("")
-          onClose()
-        }
-        break
-      case "escalate":
-        onEscalate(alert.id)
-        onClose()
-        break
-      case "call":
-        onCall(alert.patientId)
-        onClose()
-        break
-      case "message":
-        if (messageText.trim()) {
-          onMessage(alert.patientId, messageText)
-          setMessageText("")
-          onClose()
-        }
-        break
+  const handleResolve = () => {
+    if (resolutionNote.trim()) {
+      onResolve(alert.id, resolutionNote)
+      setResolutionNote("")
+      onClose()
     }
+  }
+
+  const handleSendMessage = () => {
+    if (messageText.trim()) {
+      onMessage(alert.patientId, messageText)
+      setMessageText("")
+      onClose()
+    }
+  }
+
+  const handleEscalate = () => {
+    onEscalate(alert.id)
+    setEscalationReason("")
+    setEscalationTo("")
+    onClose()
   }
 
   const getAlertTypeColor = (type: string) => {
     switch (type) {
       case "critical":
-        return "destructive"
+        return "bg-red-100 text-red-800 border-red-200"
       case "high":
-        return "default"
+        return "bg-orange-100 text-orange-800 border-orange-200"
       case "medium":
-        return "secondary"
+        return "bg-blue-100 text-blue-800 border-blue-200"
       case "low":
-        return "outline"
+        return "bg-gray-100 text-gray-800 border-gray-200"
       default:
-        return "outline"
+        return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
 
-  const getAlertTypeLabel = (type: string) => {
-    switch (type) {
-      case "critical":
-        return "Critic"
-      case "high":
-        return "Prioritate Înaltă"
-      case "medium":
-        return "Prioritate Medie"
-      case "low":
-        return "Prioritate Scăzută"
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "medical":
+        return <AlertTriangle className="h-4 w-4" />
+      case "appointment":
+        return <Calendar className="h-4 w-4" />
+      case "medication":
+        return <FileText className="h-4 w-4" />
+      case "communication":
+        return <MessageSquare className="h-4 w-4" />
+      case "system":
+        return <AlertTriangle className="h-4 w-4" />
       default:
-        return type
+        return <AlertTriangle className="h-4 w-4" />
     }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 text-black dark:text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Acțiuni pentru Alertă
+            {getCategoryIcon(alert.category)}
+            Detalii Alertă
           </DialogTitle>
-          <DialogDescription>
-            Selectează acțiunea pe care dorești să o efectuezi pentru această alertă
-          </DialogDescription>
+          <DialogDescription>Gestionează alerta pentru pacientul {alert.patientName}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Alert Details */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex items-start justify-between mb-3">
+          {/* Alert Overview */}
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3">
+            <div className="flex items-center justify-between">
               <h3 className="font-semibold text-lg">{alert.title}</h3>
-              <Badge variant={getAlertTypeColor(alert.type)}>{getAlertTypeLabel(alert.type)}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge className={getAlertTypeColor(alert.type)}>{alert.type.toUpperCase()}</Badge>
+                {alert.escalationLevel > 0 && (
+                  <Badge variant="destructive" className="text-xs">
+                    <ArrowUp className="w-3 h-3 mr-1" />
+                    Nivel {alert.escalationLevel}
+                  </Badge>
+                )}
+              </div>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Pacient:</strong> {alert.patientName}
-            </p>
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Data:</strong> {new Date(alert.timestamp).toLocaleString("ro-RO")}
-            </p>
-            <p className="text-sm text-gray-700">{alert.description}</p>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">{alert.patientName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>{new Date(alert.timestamp).toLocaleString("ro-RO")}</span>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-900 dark:text-gray-100 leading-relaxed">{alert.description}</p>
 
             {alert.relatedData && (
               <div className="mt-3">
-                <p className="text-sm font-medium text-gray-900 mb-1">Date suplimentare:</p>
-                <div className="bg-white p-2 rounded text-xs">
+                <Label className="text-xs font-medium text-muted-foreground">Date suplimentare:</Label>
+                <div className="mt-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-xs">
                   <pre className="whitespace-pre-wrap">{JSON.stringify(alert.relatedData, null, 2)}</pre>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Action Selection */}
-          <div>
-            <Label htmlFor="action-type" className="text-sm font-medium">
-              Selectează acțiunea
-            </Label>
-            <Select value={actionType} onValueChange={(value: any) => setActionType(value)}>
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="resolve">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Rezolvă alerta
-                  </div>
-                </SelectItem>
-                <SelectItem value="escalate">
-                  <div className="flex items-center gap-2">
-                    <ArrowUp className="h-4 w-4" />
-                    Escaladează la echipa medicală
-                  </div>
-                </SelectItem>
-                <SelectItem value="call">
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    Sună pacientul
-                  </div>
-                </SelectItem>
-                <SelectItem value="message">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    Trimite mesaj pacientului
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Action Tabs */}
+          <div className="flex gap-2 border-b">
+            <Button
+              variant={activeTab === "details" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("details")}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Detalii
+            </Button>
+            <Button
+              variant={activeTab === "resolve" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("resolve")}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Rezolvă
+            </Button>
+            <Button
+              variant={activeTab === "message" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("message")}
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Mesaj
+            </Button>
+            <Button
+              variant={activeTab === "escalate" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("escalate")}
+            >
+              <ArrowUp className="h-4 w-4 mr-2" />
+              Escaladează
+            </Button>
           </div>
 
-          {/* Action-specific inputs */}
-          {actionType === "resolve" && (
-            <div>
-              <Label htmlFor="resolution-note" className="text-sm font-medium">
-                Note de rezolvare *
-              </Label>
-              <Textarea
-                id="resolution-note"
-                placeholder="Descrie cum a fost rezolvată alerta și ce măsuri au fost luate..."
-                value={resolutionNote}
-                onChange={(e) => setResolutionNote(e.target.value)}
-                rows={4}
-                className="mt-2"
-              />
-            </div>
-          )}
+          {/* Tab Content */}
+          <div className="min-h-[200px]">
+            {activeTab === "details" && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">ID Alertă</Label>
+                    <p className="text-sm text-muted-foreground">{alert.id}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Categorie</Label>
+                    <p className="text-sm text-muted-foreground capitalize">{alert.category}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Asignat către</Label>
+                    <p className="text-sm text-muted-foreground">{alert.assignedTo}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Status</Label>
+                    <div className="flex gap-2">
+                      <Badge variant={alert.isRead ? "secondary" : "default"}>
+                        {alert.isRead ? "Citită" : "Necitită"}
+                      </Badge>
+                      <Badge variant={alert.isResolved ? "secondary" : "destructive"}>
+                        {alert.isResolved ? "Rezolvată" : "Activă"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
 
-          {actionType === "message" && (
-            <div>
-              <Label htmlFor="message-text" className="text-sm font-medium">
-                Mesaj pentru pacient *
-              </Label>
-              <Textarea
-                id="message-text"
-                placeholder="Scrie mesajul pe care dorești să îl trimiți pacientului..."
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                rows={4}
-                className="mt-2"
-              />
-            </div>
-          )}
+                {alert.resolutionNote && (
+                  <div>
+                    <Label className="text-sm font-medium">Notă rezolvare</Label>
+                    <p className="text-sm text-muted-foreground mt-1 p-2 bg-green-50 rounded">{alert.resolutionNote}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-          {actionType === "escalate" && (
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Atenție:</strong> Escaladarea acestei alerte va notifica echipa medicală și va crește nivelul de
-                prioritate. Asigură-te că este necesar acest pas.
-              </p>
-            </div>
-          )}
+            {activeTab === "resolve" && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="resolution-note">Notă rezolvare *</Label>
+                  <Textarea
+                    id="resolution-note"
+                    placeholder="Descrie cum a fost rezolvată alerta și ce acțiuni au fost întreprinse..."
+                    value={resolutionNote}
+                    onChange={(e) => setResolutionNote(e.target.value)}
+                    rows={4}
+                    className="mt-1 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  />
+                </div>
+                <Button onClick={handleResolve} disabled={!resolutionNote.trim()} className="w-full">
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Marchează ca Rezolvată
+                </Button>
+              </div>
+            )}
 
-          {actionType === "call" && (
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Informație:</strong> Vei fi redirecționat către sistemul de telefonie pentru a iniția apelul
-                către pacient.
-              </p>
-            </div>
-          )}
+            {activeTab === "message" && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="message-text">Mesaj pentru pacient *</Label>
+                  <Textarea
+                    id="message-text"
+                    placeholder="Scrie mesajul pentru pacient..."
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    rows={4}
+                    className="mt-1 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSendMessage} disabled={!messageText.trim()} className="flex-1">
+                    <Send className="mr-2 h-4 w-4" />
+                    Trimite Mesaj
+                  </Button>
+                  <Button variant="outline" onClick={() => onCall(alert.patientId)}>
+                    <Phone className="mr-2 h-4 w-4" />
+                    Sună
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "escalate" && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="escalation-to">Escaladează către</Label>
+                  <Select value={escalationTo} onValueChange={setEscalationTo}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Selectează destinatarul" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="senior-navigator">Navigator Senior</SelectItem>
+                      <SelectItem value="medical-team">Echipa Medicală</SelectItem>
+                      <SelectItem value="emergency">Urgențe</SelectItem>
+                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="escalation-reason">Motiv escaladare</Label>
+                  <Textarea
+                    id="escalation-reason"
+                    placeholder="Explică de ce această alertă necesită escaladare..."
+                    value={escalationReason}
+                    onChange={(e) => setEscalationReason(e.target.value)}
+                    rows={3}
+                    className="mt-1 bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  />
+                </div>
+                <Button onClick={handleEscalate} variant="destructive" className="w-full">
+                  <ArrowUp className="mr-2 h-4 w-4" />
+                  Escaladează Alerta
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Anulează
-          </Button>
-          <Button
-            onClick={handleAction}
-            disabled={
-              (actionType === "resolve" && !resolutionNote.trim()) || (actionType === "message" && !messageText.trim())
-            }
-          >
-            {actionType === "resolve" && "Rezolvă Alerta"}
-            {actionType === "escalate" && "Escaladează"}
-            {actionType === "call" && "Inițiază Apel"}
-            {actionType === "message" && "Trimite Mesaj"}
+            Închide
           </Button>
         </DialogFooter>
       </DialogContent>

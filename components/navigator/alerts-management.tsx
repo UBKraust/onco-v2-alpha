@@ -262,7 +262,17 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
                   Necesită intervenție imediată. Contactează echipa medicală dacă este necesar.
                 </p>
               </div>
-              <Button variant="destructive" size="sm" className="shrink-0">
+              <Button
+                variant="destructive"
+                size="sm"
+                className="shrink-0"
+                onClick={() => {
+                  // Deschide prima alertă critică pentru acțiune imediată
+                  if (criticalAlerts.length > 0) {
+                    handleAlertAction(criticalAlerts[0], "resolve")
+                  }
+                }}
+              >
                 <AlertTriangle className="mr-2 h-4 w-4" />
                 Acționează Acum
               </Button>
