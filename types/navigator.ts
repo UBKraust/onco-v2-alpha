@@ -35,6 +35,10 @@ export interface PatientAlert {
   assignedTo: string
   escalationLevel: number
   relatedData?: any
+  resolutionNote?: string
+  resolvedAt?: string
+  resolvedBy?: string
+  escalatedAt?: string
 }
 
 export interface NavigatorTask {

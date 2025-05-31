@@ -1,20 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
 import {
   AlertTriangle,
   Clock,
@@ -28,18 +20,96 @@ import {
   Calendar,
   Pill,
   Users,
+  Settings,
 } from "lucide-react"
 import { useNavigatorData } from "@/hooks/useNavigatorData"
+import { useAlertFilters } from "@/hooks/useAlertFilters"
+import { AlertFilters } from "./alert-filters"
+import { AlertActionDialog } from "./alert-action-dialog"
+import type { PatientAlert } from "@/types/navigator"
 
 interface AlertsManagementProps {
   onSelectPatient: (patientId: string) => void
 }
 
 export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
-  const { alerts, unreadAlerts, unresolvedAlerts, markAlertAsRead, resolveAlert, escalateAlert } = useNavigatorData()
+  const {
+    alerts,
+    unreadAlerts,
+    unresolvedAlerts,
+    markAlertAsRead,
+    resolveAlert,
+    escalateAlert,
+    markAllAlertsAsRead,
+    initiatePhoneCall,
+    sendMessage,
+  } = useNavigatorData()
 
-  const [selectedAlert, setSelectedAlert] = useState<any>(null)
-  const [resolutionNote, setResolutionNote] = useState("")
+  const {
+    filters,
+    sortBy,
+    sortOrder,
+    updateFilter,
+    toggleFilterValue,
+    clearFilters,
+    setSortBy,
+    setSortOrder,
+    hasActiveFilters,
+  } = useAlertFilters()
+
+  const [selectedAlert, setSelectedAlert] = useState<PatientAlert | null>(null)
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false)
+  const { toast } = useToast()
+
+  // Filter and sort alerts
+  const filteredAndSortedAlerts = useMemo(() => {
+    const filtered = alerts.filter((alert) => {
+      // Apply filters
+      if (filters.type.length > 0 && !filters.type.includes(alert.type)) return false
+      if (filters.category.length > 0 && !filters.category.includes(alert.category)) return false
+      if (!filters.showResolved && alert.isResolved) return false
+      if (!filters.showRead && alert.isRead) return false
+      if (
+        filters.searchTerm &&
+        !alert.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
+        !alert.patientName.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
+        !alert.description.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      )
+        return false
+
+      // Date range filter
+      if (filters.dateRange.from || filters.dateRange.to) {
+        const alertDate = new Date(alert.timestamp)
+        if (filters.dateRange.from && alertDate < filters.dateRange.from) return false
+        if (filters.dateRange.to && alertDate > filters.dateRange.to) return false
+      }
+
+      return true
+    })
+
+    // Sort alerts
+    filtered.sort((a, b) => {
+      let comparison = 0
+
+      switch (sortBy) {
+        case "timestamp":
+          comparison = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          break
+        case "priority":
+          const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 }
+          comparison =
+            priorityOrder[a.type as keyof typeof priorityOrder] - priorityOrder[b.type as keyof typeof priorityOrder]
+          break
+        case "patient":
+          comparison = a.patientName.localeCompare(b.patientName)
+          break
+      }
+
+      return sortOrder === "desc" ? -comparison : comparison
+    })
+
+    return filtered
+  }, [alerts, filters, sortBy, sortOrder])
 
   const getAlertTypeColor = (type: string) => {
     switch (type) {
@@ -105,14 +175,45 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
     }
   }
 
-  const handleResolveAlert = (alertId: string) => {
-    resolveAlert(alertId)
-    setSelectedAlert(null)
-    setResolutionNote("")
+  const handleAlertAction = (alert: PatientAlert, action: string) => {
+    setSelectedAlert(alert)
+    setIsActionDialogOpen(true)
+    if (!alert.isRead) {
+      markAlertAsRead(alert.id)
+    }
+  }
+
+  const handleResolveAlert = (alertId: string, note: string) => {
+    resolveAlert(alertId, note)
+    toast({
+      title: "Alertă rezolvată",
+      description: "Alerta a fost marcată ca rezolvată cu succes.",
+    })
   }
 
   const handleEscalateAlert = (alertId: string) => {
     escalateAlert(alertId)
+    toast({
+      title: "Alertă escaladată",
+      description: "Alerta a fost escaladată către echipa medicală.",
+      variant: "destructive",
+    })
+  }
+
+  const handlePhoneCall = (patientId: string) => {
+    initiatePhoneCall(patientId)
+    toast({
+      title: "Apel inițiat",
+      description: "Sistemul de telefonie a fost activat.",
+    })
+  }
+
+  const handleSendMessage = (patientId: string, message: string) => {
+    sendMessage(patientId, message)
+    toast({
+      title: "Mesaj trimis",
+      description: "Mesajul a fost trimis către pacient.",
+    })
   }
 
   const criticalAlerts = alerts.filter((a) => a.type === "critical" && !a.isResolved)
@@ -132,8 +233,12 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <Bell className="mr-2 h-4 w-4" />
+            <Settings className="mr-2 h-4 w-4" />
             Configurări Alerte
+          </Button>
+          <Button onClick={markAllAlertsAsRead} disabled={unreadAlerts.length === 0}>
+            <Bell className="mr-2 h-4 w-4" />
+            Marchează toate ca citite
           </Button>
           <Button>
             <Users className="mr-2 h-4 w-4" />
@@ -144,20 +249,21 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
 
       {/* Critical Alerts Banner */}
       {criticalAlerts.length > 0 && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-6 w-6 text-red-500" />
-              <div>
-                <h3 className="font-semibold text-red-800">
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-800 dark:text-red-200">
                   {criticalAlerts.length} Alertă{criticalAlerts.length > 1 ? "e" : ""} Critică
                   {criticalAlerts.length > 1 ? "e" : ""}!
                 </h3>
-                <p className="text-red-700">
+                <p className="text-red-700 dark:text-red-300 text-sm">
                   Necesită intervenție imediată. Contactează echipa medicală dacă este necesar.
                 </p>
               </div>
-              <Button variant="destructive" size="sm" className="ml-auto">
+              <Button variant="destructive" size="sm" className="shrink-0">
+                <AlertTriangle className="mr-2 h-4 w-4" />
                 Acționează Acum
               </Button>
             </div>
@@ -214,232 +320,190 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
         </Card>
       </div>
 
+      {/* Filters */}
       {/* Alerts Tabs */}
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active">Alerte Active ({unresolvedAlerts.length})</TabsTrigger>
+          <TabsTrigger value="active">
+            Alerte Active ({filteredAndSortedAlerts.filter((a) => !a.isResolved).length})
+          </TabsTrigger>
           <TabsTrigger value="critical">Critice ({criticalAlerts.length})</TabsTrigger>
           <TabsTrigger value="unread">Necitite ({unreadAlerts.length})</TabsTrigger>
           <TabsTrigger value="resolved">Rezolvate ({alerts.filter((a) => a.isResolved).length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Alerte Active</CardTitle>
-              <CardDescription>Toate alertele nerezolvate care necesită atenție</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-sm text-muted-foreground">{unresolvedAlerts.length} alerte active găsite</div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    Filtrează
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Sortează
-                  </Button>
-                </div>
-              </div>
+        <TabsContent value="active" className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold">Alerte Active</h2>
+            <p className="text-sm text-muted-foreground">Toate alertele nerezolvate care necesită intervenție.</p>
+          </div>
 
-              {unresolvedAlerts.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Toate alertele sunt rezolvate!</h3>
-                  <p className="text-muted-foreground">
-                    Nu există alerte active care necesită atenție în acest moment.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {unresolvedAlerts.map((alert) => (
-                    <div
-                      key={alert.id}
-                      className={`p-6 border rounded-xl cursor-pointer hover:shadow-md transition-all duration-200 ${
-                        !alert.isRead
-                          ? "border-blue-200 bg-gradient-to-r from-blue-50 to-blue-25 shadow-sm"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      onClick={() => onSelectPatient(alert.patientId)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-4 flex-1">
-                          <Avatar className="w-12 h-12 ring-2 ring-white shadow-sm">
-                            <AvatarImage src={`/placeholder-patient.jpg`} />
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                              {alert.patientName
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+          {/* Sticky Filters */}
+          {/* <div className="sticky top-[80px] z-20 bg-background py-4">
+            <AlertFilters
+              filters={filters}
+              onFilterChange={updateFilter}
+              onToggleFilter={toggleFilterValue}
+              onClearFilters={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={setSortBy}
+              onSortOrderChange={setSortOrder}
+            />
+          </div> */}
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-3">
-                              <h4 className="font-semibold text-lg text-gray-900">{alert.title}</h4>
-                              <Badge variant={getAlertTypeColor(alert.type)} className="font-medium">
-                                {getAlertTypeLabel(alert.type)}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {getCategoryIcon(alert.category)}
-                                <span className="ml-1">{getCategoryLabel(alert.category)}</span>
-                              </Badge>
-                              {!alert.isRead && (
-                                <div className="flex items-center gap-1">
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                  <span className="text-xs font-medium text-blue-600">NOU</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="mb-3">
-                              <p className="text-sm text-gray-600 mb-1">
-                                <span className="font-medium text-gray-900">{alert.patientName}</span> •
-                                <span className="ml-1">{new Date(alert.timestamp).toLocaleString("ro-RO")}</span>
-                              </p>
-                            </div>
-
-                            <p className="text-sm text-gray-700 mb-4 leading-relaxed">{alert.description}</p>
-
-                            {alert.escalationLevel > 0 && (
-                              <Badge variant="destructive" className="text-xs mb-2">
-                                <ArrowUp className="w-3 h-3 mr-1" />
-                                Escaladat nivel {alert.escalationLevel}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2 ml-6">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="hover:bg-blue-50 hover:border-blue-300"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedAlert(alert)
-                                  if (!alert.isRead) markAlertAsRead(alert.id)
-                                }}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Detalii Alertă</DialogTitle>
-                                <DialogDescription>
-                                  Informații complete despre alertă și acțiuni disponibile
-                                </DialogDescription>
-                              </DialogHeader>
-                              {selectedAlert && (
-                                <div className="space-y-4">
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <p className="text-sm font-medium">Pacient</p>
-                                      <p className="text-sm">{selectedAlert.patientName}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-medium">Tip Alertă</p>
-                                      <Badge variant={getAlertTypeColor(selectedAlert.type)}>
-                                        {getAlertTypeLabel(selectedAlert.type)}
-                                      </Badge>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-medium">Categorie</p>
-                                      <p className="text-sm">{getCategoryLabel(selectedAlert.category)}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-medium">Timestamp</p>
-                                      <p className="text-sm">
-                                        {new Date(selectedAlert.timestamp).toLocaleString("ro-RO")}
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div>
-                                    <p className="text-sm font-medium mb-2">Descriere</p>
-                                    <p className="text-sm bg-gray-50 p-3 rounded">{selectedAlert.description}</p>
-                                  </div>
-
-                                  {selectedAlert.relatedData && (
-                                    <div>
-                                      <p className="text-sm font-medium mb-2">Date Suplimentare</p>
-                                      <div className="bg-gray-50 p-3 rounded text-sm">
-                                        <pre>{JSON.stringify(selectedAlert.relatedData, null, 2)}</pre>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  <div>
-                                    <p className="text-sm font-medium mb-2">Note Rezolvare</p>
-                                    <Textarea
-                                      placeholder="Adaugă note despre cum a fost rezolvată alerta..."
-                                      value={resolutionNote}
-                                      onChange={(e) => setResolutionNote(e.target.value)}
-                                      rows={3}
-                                    />
-                                  </div>
-
-                                  <div className="flex gap-2">
-                                    <Button onClick={() => handleResolveAlert(selectedAlert.id)} className="flex-1">
-                                      <CheckCircle className="mr-2 h-4 w-4" />
-                                      Marchează ca Rezolvată
-                                    </Button>
-                                    <Button variant="outline" onClick={() => handleEscalateAlert(selectedAlert.id)}>
-                                      <ArrowUp className="mr-2 h-4 w-4" />
-                                      Escaladează
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-green-50 hover:border-green-300"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Handle phone call
-                            }}
-                          >
-                            <Phone className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-purple-50 hover:border-purple-300"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Handle message
-                            }}
-                          >
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-green-50 hover:border-green-300"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleResolveAlert(alert.id)
-                            }}
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                        </div>
+          {filteredAndSortedAlerts.filter((a) => !a.isResolved).length === 0 ? (
+            <div className="text-center py-12">
+              <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                {hasActiveFilters ? "Nu s-au găsit alerte" : "Toate alertele sunt rezolvate!"}
+              </h3>
+              <p className="text-gray-700">
+                {hasActiveFilters
+                  ? "Încearcă să modifici filtrele pentru a vedea mai multe rezultate."
+                  : "Nu există alerte active care necesită atenție în acest moment."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {filteredAndSortedAlerts
+                .filter((a) => !a.isResolved)
+                .map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="rounded-lg bg-white dark:bg-gray-900 p-4 shadow-sm border space-y-3 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => onSelectPatient(alert.patientId)}
+                  >
+                    {/* Titlu alertă + icon + badge */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {getCategoryIcon(alert.category)}
+                        <h3
+                          className={`font-semibold text-sm ${
+                            alert.type === "critical"
+                              ? "text-red-600"
+                              : alert.type === "high"
+                                ? "text-orange-600"
+                                : alert.type === "medium"
+                                  ? "text-blue-600"
+                                  : "text-gray-600"
+                          }`}
+                        >
+                          {alert.title}
+                        </h3>
+                        {!alert.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant={
+                            alert.type === "critical"
+                              ? "destructive"
+                              : alert.type === "high"
+                                ? "default"
+                                : alert.type === "medium"
+                                  ? "secondary"
+                                  : "outline"
+                          }
+                          className={
+                            alert.type === "critical"
+                              ? "bg-red-100 text-red-800 border-red-200"
+                              : alert.type === "high"
+                                ? "bg-orange-100 text-orange-800 border-orange-200"
+                                : alert.type === "medium"
+                                  ? "bg-blue-100 text-blue-800 border-blue-200"
+                                  : "bg-gray-100 text-gray-800 border-gray-200"
+                          }
+                        >
+                          {getAlertTypeLabel(alert.type).toUpperCase()}
+                        </Badge>
+                        {alert.escalationLevel > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            <ArrowUp className="w-3 h-3 mr-1" />
+                            Nivel {alert.escalationLevel}
+                          </Badge>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+                    {/* Descriere */}
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{alert.description}</p>
+
+                    {/* Pacient + timestamp + acțiuni rapide */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={`/placeholder-patient.jpg`} />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
+                            {alert.patientName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-gray-900">{alert.patientName}</span>
+                        <span>•</span>
+                        <span>
+                          {new Date(alert.timestamp).toLocaleString("ro-RO", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePhoneCall(alert.patientId)
+                          }}
+                        >
+                          <Phone className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAlertAction(alert, "message")
+                          }}
+                        >
+                          <MessageSquare className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-purple-50 hover:text-purple-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAlertAction(alert, "view")
+                          }}
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAlertAction(alert, "resolve")
+                          }}
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="critical">
@@ -460,18 +524,23 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
               ) : (
                 <div className="space-y-4">
                   {criticalAlerts.map((alert) => (
-                    <div key={alert.id} className="p-4 border-2 border-red-200 bg-red-50 rounded-lg">
+                    <div key={alert.id} className="p-4 border-2 border-red-300 bg-red-50 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-semibold text-red-800">{alert.title}</h4>
-                          <p className="text-sm text-red-700">{alert.patientName}</p>
-                          <p className="text-xs text-red-600">{alert.description}</p>
+                          <h4 className="font-semibold text-red-900">{alert.title}</h4>
+                          <p className="text-sm text-red-800">{alert.patientName}</p>
+                          <p className="text-xs text-red-800">{alert.description}</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => handleAlertAction(alert, "resolve")}>
                             Acționează Acum
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-800 border-red-300 hover:bg-red-100"
+                            onClick={() => handleEscalateAlert(alert.id)}
+                          >
                             Escaladează
                           </Button>
                         </div>
@@ -497,7 +566,22 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
                   <p className="text-muted-foreground">Toate alertele au fost citite</p>
                 </div>
               ) : (
-                <p className="text-muted-foreground">Lista alertelor necitite...</p>
+                <div className="space-y-4">
+                  {unreadAlerts.map((alert) => (
+                    <div key={alert.id} className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-blue-900">{alert.title}</h4>
+                          <p className="text-sm text-blue-800">{alert.patientName}</p>
+                          <p className="text-xs text-blue-700">{alert.description}</p>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => markAlertAsRead(alert.id)}>
+                          Marchează ca citită
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -510,11 +594,68 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
               <CardDescription>Istoricul alertelor rezolvate recent</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Istoricul alertelor rezolvate...</p>
+              {alerts.filter((a) => a.isResolved).length === 0 ? (
+                <div className="text-center py-8">
+                  <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-muted-foreground">Nu există alerte rezolvate</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {alerts
+                    .filter((a) => a.isResolved)
+                    .map((alert) => (
+                      <div key={alert.id} className="p-4 border border-green-200 bg-green-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-green-900">{alert.title}</h4>
+                            <p className="text-sm text-green-800">{alert.patientName}</p>
+                            <p className="text-xs text-green-700">{alert.description}</p>
+                            {(alert as any).resolutionNote && (
+                              <p className="text-xs text-green-600 mt-1">
+                                <strong>Rezolvare:</strong> {(alert as any).resolutionNote}
+                              </p>
+                            )}
+                          </div>
+                          <Badge variant="outline" className="text-green-700 border-green-300">
+                            Rezolvată
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Action Dialog */}
+      <AlertActionDialog
+        alert={selectedAlert}
+        isOpen={isActionDialogOpen}
+        onClose={() => {
+          setIsActionDialogOpen(false)
+          setSelectedAlert(null)
+        }}
+        onResolve={handleResolveAlert}
+        onEscalate={handleEscalateAlert}
+        onCall={handlePhoneCall}
+        onMessage={handleSendMessage}
+      />
+      {/* Sticky Filters */}
+      <div className="sticky top-[80px] z-20 bg-background py-4">
+        <AlertFilters
+          filters={filters}
+          onFilterChange={updateFilter}
+          onToggleFilter={toggleFilterValue}
+          onClearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortChange={setSortBy}
+          onSortOrderChange={setSortOrder}
+        />
+      </div>
     </div>
   )
 }
