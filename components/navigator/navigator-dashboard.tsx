@@ -8,6 +8,9 @@ import { AlertsManagement } from "./alerts-management"
 import { PatientManagement } from "./patient-management"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { AdvancedAppointmentScheduler } from "@/components/appointments/advanced-appointment-scheduler"
+import { AppointmentManagement } from "@/components/appointments/appointment-management"
+import { AppointmentCalendarView } from "@/components/appointments/appointment-calendar-view"
 
 export function NavigatorDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -163,20 +166,38 @@ export function NavigatorDashboard() {
 
         <TabsContent value="appointments" className="mt-0">
           <PageTransition>
-            <div className="grid gap-4">
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Programări</CardTitle>
-                  <CardDescription>Gestionează programările pacienților</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Placeholder pentru programări */}
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">Funcționalitate în dezvoltare</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="bg-white dark:bg-gray-900">
+              <CardHeader>
+                <CardTitle>Programări</CardTitle>
+                <CardDescription>Gestionează programările pacienților</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium">Programări Recente</h3>
+                  <AdvancedAppointmentScheduler />
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-7">
+                  <Card className="lg:col-span-3 bg-white dark:bg-gray-900">
+                    <CardHeader>
+                      <CardTitle className="text-base">Programări Viitoare</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <AppointmentManagement showAllAppointments />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="lg:col-span-4 bg-white dark:bg-gray-900">
+                    <CardHeader>
+                      <CardTitle className="text-base">Calendar Programări</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <AppointmentCalendarView showFilters={false} />
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
           </PageTransition>
         </TabsContent>
 
