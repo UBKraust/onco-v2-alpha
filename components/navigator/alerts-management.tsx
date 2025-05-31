@@ -229,148 +229,215 @@ export function AlertsManagement({ onSelectPatient }: AlertsManagementProps) {
               <CardTitle>Alerte Active</CardTitle>
               <CardDescription>Toate alertele nerezolvate care necesită atenție</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {unresolvedAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${!alert.isRead ? "border-blue-200 bg-blue-50" : ""}`}
-                  onClick={() => onSelectPatient(alert.patientId)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3 flex-1">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={`/placeholder-patient.jpg`} />
-                        <AvatarFallback>
-                          {alert.patientName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-muted-foreground">{unresolvedAlerts.length} alerte active găsite</div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    Filtrează
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Sortează
+                  </Button>
+                </div>
+              </div>
 
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold">{alert.title}</h4>
-                          <Badge variant={getAlertTypeColor(alert.type)}>{getAlertTypeLabel(alert.type)}</Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {getCategoryIcon(alert.category)}
-                            <span className="ml-1">{getCategoryLabel(alert.category)}</span>
-                          </Badge>
-                          {!alert.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
+              {unresolvedAlerts.length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Toate alertele sunt rezolvate!</h3>
+                  <p className="text-muted-foreground">
+                    Nu există alerte active care necesită atenție în acest moment.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {unresolvedAlerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`p-6 border rounded-xl cursor-pointer hover:shadow-md transition-all duration-200 ${
+                        !alert.isRead
+                          ? "border-blue-200 bg-gradient-to-r from-blue-50 to-blue-25 shadow-sm"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => onSelectPatient(alert.patientId)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4 flex-1">
+                          <Avatar className="w-12 h-12 ring-2 ring-white shadow-sm">
+                            <AvatarImage src={`/placeholder-patient.jpg`} />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                              {alert.patientName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-3">
+                              <h4 className="font-semibold text-lg text-gray-900">{alert.title}</h4>
+                              <Badge variant={getAlertTypeColor(alert.type)} className="font-medium">
+                                {getAlertTypeLabel(alert.type)}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {getCategoryIcon(alert.category)}
+                                <span className="ml-1">{getCategoryLabel(alert.category)}</span>
+                              </Badge>
+                              {!alert.isRead && (
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                  <span className="text-xs font-medium text-blue-600">NOU</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mb-3">
+                              <p className="text-sm text-gray-600 mb-1">
+                                <span className="font-medium text-gray-900">{alert.patientName}</span> •
+                                <span className="ml-1">{new Date(alert.timestamp).toLocaleString("ro-RO")}</span>
+                              </p>
+                            </div>
+
+                            <p className="text-sm text-gray-700 mb-4 leading-relaxed">{alert.description}</p>
+
+                            {alert.escalationLevel > 0 && (
+                              <Badge variant="destructive" className="text-xs mb-2">
+                                <ArrowUp className="w-3 h-3 mr-1" />
+                                Escaladat nivel {alert.escalationLevel}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
 
-                        <p className="text-sm text-muted-foreground mb-2">
-                          <strong>{alert.patientName}</strong> • {new Date(alert.timestamp).toLocaleString("ro-RO")}
-                        </p>
+                        <div className="flex flex-col gap-2 ml-6">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="hover:bg-blue-50 hover:border-blue-300"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedAlert(alert)
+                                  if (!alert.isRead) markAlertAsRead(alert.id)
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Detalii Alertă</DialogTitle>
+                                <DialogDescription>
+                                  Informații complete despre alertă și acțiuni disponibile
+                                </DialogDescription>
+                              </DialogHeader>
+                              {selectedAlert && (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm font-medium">Pacient</p>
+                                      <p className="text-sm">{selectedAlert.patientName}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium">Tip Alertă</p>
+                                      <Badge variant={getAlertTypeColor(selectedAlert.type)}>
+                                        {getAlertTypeLabel(selectedAlert.type)}
+                                      </Badge>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium">Categorie</p>
+                                      <p className="text-sm">{getCategoryLabel(selectedAlert.category)}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium">Timestamp</p>
+                                      <p className="text-sm">
+                                        {new Date(selectedAlert.timestamp).toLocaleString("ro-RO")}
+                                      </p>
+                                    </div>
+                                  </div>
 
-                        <p className="text-sm mb-3">{alert.description}</p>
+                                  <div>
+                                    <p className="text-sm font-medium mb-2">Descriere</p>
+                                    <p className="text-sm bg-gray-50 p-3 rounded">{selectedAlert.description}</p>
+                                  </div>
 
-                        {alert.escalationLevel > 0 && (
-                          <Badge variant="destructive" className="text-xs mb-2">
-                            Escaladat nivel {alert.escalationLevel}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                                  {selectedAlert.relatedData && (
+                                    <div>
+                                      <p className="text-sm font-medium mb-2">Date Suplimentare</p>
+                                      <div className="bg-gray-50 p-3 rounded text-sm">
+                                        <pre>{JSON.stringify(selectedAlert.relatedData, null, 2)}</pre>
+                                      </div>
+                                    </div>
+                                  )}
 
-                    <div className="flex flex-col gap-2 ml-4">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedAlert(alert)
-                              if (!alert.isRead) markAlertAsRead(alert.id)
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Detalii Alertă</DialogTitle>
-                            <DialogDescription>
-                              Informații complete despre alertă și acțiuni disponibile
-                            </DialogDescription>
-                          </DialogHeader>
-                          {selectedAlert && (
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <p className="text-sm font-medium">Pacient</p>
-                                  <p className="text-sm">{selectedAlert.patientName}</p>
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium">Tip Alertă</p>
-                                  <Badge variant={getAlertTypeColor(selectedAlert.type)}>
-                                    {getAlertTypeLabel(selectedAlert.type)}
-                                  </Badge>
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium">Categorie</p>
-                                  <p className="text-sm">{getCategoryLabel(selectedAlert.category)}</p>
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium">Timestamp</p>
-                                  <p className="text-sm">{new Date(selectedAlert.timestamp).toLocaleString("ro-RO")}</p>
-                                </div>
-                              </div>
+                                  <div>
+                                    <p className="text-sm font-medium mb-2">Note Rezolvare</p>
+                                    <Textarea
+                                      placeholder="Adaugă note despre cum a fost rezolvată alerta..."
+                                      value={resolutionNote}
+                                      onChange={(e) => setResolutionNote(e.target.value)}
+                                      rows={3}
+                                    />
+                                  </div>
 
-                              <div>
-                                <p className="text-sm font-medium mb-2">Descriere</p>
-                                <p className="text-sm bg-gray-50 p-3 rounded">{selectedAlert.description}</p>
-                              </div>
-
-                              {selectedAlert.relatedData && (
-                                <div>
-                                  <p className="text-sm font-medium mb-2">Date Suplimentare</p>
-                                  <div className="bg-gray-50 p-3 rounded text-sm">
-                                    <pre>{JSON.stringify(selectedAlert.relatedData, null, 2)}</pre>
+                                  <div className="flex gap-2">
+                                    <Button onClick={() => handleResolveAlert(selectedAlert.id)} className="flex-1">
+                                      <CheckCircle className="mr-2 h-4 w-4" />
+                                      Marchează ca Rezolvată
+                                    </Button>
+                                    <Button variant="outline" onClick={() => handleEscalateAlert(selectedAlert.id)}>
+                                      <ArrowUp className="mr-2 h-4 w-4" />
+                                      Escaladează
+                                    </Button>
                                   </div>
                                 </div>
                               )}
+                            </DialogContent>
+                          </Dialog>
 
-                              <div>
-                                <p className="text-sm font-medium mb-2">Note Rezolvare</p>
-                                <Textarea
-                                  placeholder="Adaugă note despre cum a fost rezolvată alerta..."
-                                  value={resolutionNote}
-                                  onChange={(e) => setResolutionNote(e.target.value)}
-                                  rows={3}
-                                />
-                              </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-green-50 hover:border-green-300"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Handle phone call
+                            }}
+                          >
+                            <Phone className="h-4 w-4" />
+                          </Button>
 
-                              <div className="flex gap-2">
-                                <Button onClick={() => handleResolveAlert(selectedAlert.id)} className="flex-1">
-                                  <CheckCircle className="mr-2 h-4 w-4" />
-                                  Marchează ca Rezolvată
-                                </Button>
-                                <Button variant="outline" onClick={() => handleEscalateAlert(selectedAlert.id)}>
-                                  <ArrowUp className="mr-2 h-4 w-4" />
-                                  Escaladează
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </DialogContent>
-                      </Dialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-purple-50 hover:border-purple-300"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Handle message
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
 
-                      <Button variant="outline" size="sm">
-                        <Phone className="h-4 w-4" />
-                      </Button>
-
-                      <Button variant="outline" size="sm">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-
-                      <Button variant="outline" size="sm" onClick={() => handleResolveAlert(alert.id)}>
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-green-50 hover:border-green-300"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleResolveAlert(alert.id)
+                            }}
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </TabsContent>
