@@ -23,7 +23,6 @@ import {
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useNavigatorData } from "@/hooks/useNavigatorData"
-import { AppointmentWizard } from "./appointment-wizard"
 import { Clock, FileText } from "lucide-react"
 
 export function NavigatorDashboard() {
@@ -243,12 +242,10 @@ export function NavigatorDashboard() {
                     <h1 className="text-3xl font-bold">Gestionare Programări</h1>
                     <p className="text-muted-foreground">Coordonează programările pentru toți pacienții</p>
                   </div>
-                  <AppointmentWizard
-                    onAppointmentCreated={(appointment) => {
-                      // Handle appointment creation
-                      console.log("New appointment created:", appointment)
-                    }}
-                  />
+                  <Button>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Programare Nouă
+                  </Button>
                 </div>
 
                 {/* Quick Stats */}
