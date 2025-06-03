@@ -29,6 +29,8 @@ import {
   TrendingUp,
 } from "lucide-react"
 import { useNavigatorData } from "@/hooks/useNavigatorData"
+import { PatientOnboardingDialog } from "./patient-onboarding-dialog"
+import { toast } from "@/components/ui/use-toast"
 
 interface PatientManagementProps {
   onSelectPatient: (patientId: string) => void
@@ -39,6 +41,7 @@ export function PatientManagement({ onSelectPatient }: PatientManagementProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [riskFilter, setRiskFilter] = useState("all")
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const [showOnboardingDialog, setShowOnboardingDialog] = useState(false)
 
   const filteredPatients = patients.filter((patient) => {
     const matchesSearch =
@@ -98,7 +101,7 @@ export function PatientManagement({ onSelectPatient }: PatientManagementProps) {
           <h1 className="text-3xl font-bold">Gestionare Pacienți</h1>
           <p className="text-muted-foreground">Monitorizează și gestionează pacienții din grija ta</p>
         </div>
-        <Button>
+        <Button onClick={() => setShowOnboardingDialog(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           Adaugă Pacient
         </Button>
@@ -435,6 +438,18 @@ export function PatientManagement({ onSelectPatient }: PatientManagementProps) {
           </Card>
         </TabsContent>
       </Tabs>
+      <PatientOnboardingDialog
+        open={showOnboardingDialog}
+        onOpenChange={setShowOnboardingDialog}
+        onPatientAdded={(newPatient) => {
+          toast({
+            title: "Pacient adăugat cu succes!",
+            description: `${newPatient.firstName} ${newPatient.lastName} a fost înregistrat în sistem.`,
+          })
+          // Aici ar trebui să reîmprospătăm lista de pacienți
+          // În implementarea reală, acest lucru ar putea implica o reîncărcare a datelor
+        }}
+      />
     </div>
   )
 }
