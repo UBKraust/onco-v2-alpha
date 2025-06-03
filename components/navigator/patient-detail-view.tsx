@@ -25,8 +25,13 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  History,
 } from "lucide-react"
 import { useNavigatorData } from "@/hooks/useNavigatorData"
+import { PatientStatusBadge } from "./patient-status-badge"
+import { PatientStatusSelector } from "./patient-status-selector"
+import { PatientStatusHistory } from "./patient-status-history"
+import { usePatientStatus } from "@/hooks/usePatientStatus"
 
 interface PatientDetailViewProps {
   patientId: string
@@ -36,6 +41,8 @@ interface PatientDetailViewProps {
 export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps) {
   const { getPatientDetail } = useNavigatorData()
   const [activeTab, setActiveTab] = useState("overview")
+  const { currentStatus, statusHistory, updateStatus } = usePatientStatus(patientId, "in-treatment")
+  const [showStatusSelector, setShowStatusSelector] = useState(false)
 
   const patient = getPatientDetail(patientId)
 
@@ -122,6 +129,7 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
               <h2 className="text-2xl font-bold">
                 {patient.firstName} {patient.lastName}
               </h2>
+              <PatientStatusBadge status={currentStatus} />
               <Badge variant={getRiskBadgeVariant(patient.riskLevel)}>{getRiskLabel(patient.riskLevel)}</Badge>
             </div>
 
@@ -204,6 +212,10 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
           <TabsTrigger value="education" className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4" />
             <span className="hidden sm:inline">Educație</span>
+          </TabsTrigger>
+          <TabsTrigger value="status" className="flex items-center gap-2">
+            <History className="h-4 w-4" />
+            <span className="hidden sm:inline">Status</span>
           </TabsTrigger>
         </TabsList>
 
@@ -304,6 +316,30 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Alerte Active</span>
                   <span className="font-bold text-red-600">{patient.activeAlerts}</span>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Card Status Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Status Pacient
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status curent</p>
+                    <PatientStatusBadge status={currentStatus} />
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setShowStatusSelector(true)}>
+                    Modifică Status
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Ultima actualizare:{" "}
+                  {statusHistory[0]?.date ? new Date(statusHistory[0].date).toLocaleDateString("ro-RO") : "N/A"}
                 </div>
               </CardContent>
             </Card>
@@ -813,6 +849,9 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="status" className="mt-6">
+          <PatientStatusHistory history={statusHistory} />
+        </TabsContent>
       </Tabs>
 
       {/* Quick Actions Bar pentru mobile */}
@@ -830,6 +869,13 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
           <AlertTriangle className="h-4 w-4" />
         </Button>
       </div>
+      <PatientStatusSelector
+        currentStatus={currentStatus}
+        patientName={`${patient.firstName} ${patient.lastName}`}
+        open={showStatusSelector}
+        onOpenChange={setShowStatusSelector}
+        onStatusChange={updateStatus}
+      />
     </div>
   )
 }

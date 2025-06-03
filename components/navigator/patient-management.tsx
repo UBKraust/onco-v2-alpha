@@ -31,6 +31,7 @@ import {
 import { useNavigatorData } from "@/hooks/useNavigatorData"
 import { PatientOnboardingDialog } from "./patient-onboarding-dialog"
 import { toast } from "@/components/ui/use-toast"
+import { PatientStatusBadge } from "./patient-status-badge"
 
 interface PatientManagementProps {
   onSelectPatient: (patientId: string) => void
@@ -185,6 +186,18 @@ export function PatientManagement({ onSelectPatient }: PatientManagementProps) {
                 <SelectItem value="low">Risc scăzut</SelectItem>
               </SelectContent>
             </Select>
+            <Select value="all" onValueChange={() => {}}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrează după status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toate statusurile</SelectItem>
+                <SelectItem value="in-treatment">În tratament</SelectItem>
+                <SelectItem value="monitoring">Monitorizare</SelectItem>
+                <SelectItem value="completed">Finalizat</SelectItem>
+                <SelectItem value="suspended">Suspendat</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline">
               <Filter className="mr-2 h-4 w-4" />
               Mai multe filtre
@@ -247,6 +260,7 @@ export function PatientManagement({ onSelectPatient }: PatientManagementProps) {
                             <h3 className="font-semibold">
                               {patient.firstName} {patient.lastName}
                             </h3>
+                            <PatientStatusBadge status={patient.status || "in-treatment"} size="sm" />
                             <Badge variant={getRiskColor(patient.riskLevel)}>{getRiskLabel(patient.riskLevel)}</Badge>
                             {patientAlerts.length > 0 && (
                               <Badge variant="destructive" className="text-xs">
