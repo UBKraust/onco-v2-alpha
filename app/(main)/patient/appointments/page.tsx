@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AppointmentCard } from "@/components/ui/appointment-card"
 import { CalendarView } from "@/components/ui/calendar-view"
 import { AppointmentScheduler } from "@/components/appointments/appointment-scheduler"
+import { AppointmentDetailsModal } from "@/components/appointments/appointment-details-modal"
 import { useMockPatientAppointments } from "@/hooks/useMockPatientAppointments"
 import type { Appointment } from "@/types/patient"
 import { AlertTriangle } from "lucide-react"
@@ -13,15 +14,44 @@ import { toast } from "@/components/ui/use-toast"
 export default function AppointmentsPage() {
   const { appointments: allAppointments, isLoading, error } = useMockPatientAppointments()
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date)
   }
 
   const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedAppointment(null)
+  }
+
+  const handleReschedule = (appointmentId: string) => {
     toast({
-      title: `Programare Selectată: ${appointment.title}`,
-      description: `${appointment.date} la ${appointment.time} cu ${appointment.doctor}`,
+      title: "Reprogramare Inițiată",
+      description: "Vei fi contactat în curând pentru a stabili o nouă dată.",
+    })
+    handleCloseModal()
+  }
+
+  const handleCancel = (appointmentId: string) => {
+    toast({
+      title: "Programare Anulată",
+      description: "Programarea a fost anulată cu succes.",
+      variant: "destructive",
+    })
+    handleCloseModal()
+  }
+
+  const handleAddNotes = (appointmentId: string, notes: string) => {
+    toast({
+      title: "Notițe Salvate",
+      description: "Notițele au fost adăugate la programare.",
     })
   }
 
@@ -113,25 +143,26 @@ export default function AppointmentsPage() {
             <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
               {(selectedDate ? selectedDateAppointments : upcomingAppointments).length > 0 ? (
                 (selectedDate ? selectedDateAppointments : upcomingAppointments).map((apt) => (
-                  <AppointmentCard
-                    key={apt.id}
-                    id={apt.id}
-                    title={apt.title}
-                    doctor={apt.doctor}
-                    specialty={apt.specialty}
-                    date={new Date(apt.date).toLocaleDateString("ro-RO", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                    time={apt.time}
-                    location={apt.location}
-                    status={mapStatusForAppointmentCard(apt.status)}
-                    notes={apt.notes}
-                    priority={apt.priority}
-                    onReschedule={(id) => toast({ title: `Reprogramează: ${id}` })}
-                    onCancel={(id) => toast({ title: `Anulează: ${id}`, variant: "destructive" })}
-                  />
+                  <div key={apt.id} onClick={() => handleAppointmentClick(apt)} className="cursor-pointer">
+                    <AppointmentCard
+                      id={apt.id}
+                      title={apt.title}
+                      doctor={apt.doctor}
+                      specialty={apt.specialty}
+                      date={new Date(apt.date).toLocaleDateString("ro-RO", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                      time={apt.time}
+                      location={apt.location}
+                      status={mapStatusForAppointmentCard(apt.status)}
+                      notes={apt.notes}
+                      priority={apt.priority}
+                      onReschedule={(id) => handleReschedule(id)}
+                      onCancel={(id) => handleCancel(id)}
+                    />
+                  </div>
                 ))
               ) : (
                 <p className="text-muted-foreground">
@@ -142,6 +173,16 @@ export default function AppointmentsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        appointment={selectedAppointment}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onReschedule={handleReschedule}
+        onCancel={handleCancel}
+        onAddNotes={handleAddNotes}
+      />
     </div>
   )
 }
