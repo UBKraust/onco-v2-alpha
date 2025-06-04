@@ -1,0 +1,40 @@
+graph TD
+    A["Patient Input"] --> B["Frontend Validation"]
+    B --> C["API Request"]
+    C --> D["Authentication Check"]
+    D --> E["Authorization Check"]
+    E --> F["Data Validation"]
+    F --> G["Business Logic Processing"]
+    
+    G --> H["Database Operations"]
+    G --> I["File Operations"]
+    G --> J["Notification Triggers"]
+    
+    H --> K["Patient Records"]
+    H --> L["Medical History"]
+    H --> M["Appointments"]
+    H --> N["Symptoms Log"]
+    
+    I --> O["Document Storage"]
+    I --> P["Image Processing"]
+    
+    J --> Q["Email Notifications"]
+    J --> R["SMS Alerts"]
+    J --> S["In-App Notifications"]
+    
+    K --> T["Navigator Dashboard"]
+    L --> T
+    M --> T
+    N --> T
+    
+    K --> U["Admin Reports"]
+    L --> U
+    M --> U
+    N --> U
+    
+    O --> V["Document Viewer"]
+    P --> V
+    
+    Q --> W["Patient Email"]
+    R --> X["Patient Phone"]
+    S --> Y["Patient Dashboard"]

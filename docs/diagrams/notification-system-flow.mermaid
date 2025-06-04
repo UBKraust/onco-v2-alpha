@@ -1,0 +1,57 @@
+graph TD
+    A["Event Trigger"] --> B["Notification Service"]
+    B --> C["Determine Notification Type"]
+    
+    C --> D{"Notification Category"}
+    D -->|Critical| E["Immediate Processing"]
+    D -->|Important| F["High Priority Queue"]
+    D -->|Normal| G["Standard Queue"]
+    D -->|Low| H["Batch Processing"]
+    
+    E --> I["Real-time Delivery"]
+    F --> J["Priority Delivery"]
+    G --> K["Standard Delivery"]
+    H --> L["Scheduled Delivery"]
+    
+    I --> M["Determine Recipients"]
+    J --> M
+    K --> M
+    L --> M
+    
+    M --> N["Check User Preferences"]
+    N --> O["Select Delivery Channels"]
+    
+    O --> P{"Delivery Method"}
+    P -->|Email| Q["Email Service"]
+    P -->|SMS| R["SMS Service"]
+    P -->|Push| S["Push Notification"]
+    P -->|In-App| T["In-App Notification"]
+    
+    Q --> U["Email Template Processing"]
+    R --> V["SMS Template Processing"]
+    S --> W["Push Payload Creation"]
+    T --> X["In-App Message Creation"]
+    
+    U --> Y["Send Email"]
+    V --> Z["Send SMS"]
+    W --> AA["Send Push"]
+    X --> BB["Store In-App Message"]
+    
+    Y --> CC["Track Delivery Status"]
+    Z --> CC
+    AA --> CC
+    BB --> CC
+    
+    CC --> DD["Update Notification Log"]
+    DD --> EE["Generate Delivery Report"]
+    
+    FF["User Interaction"] --> GG["Mark as Read"]
+    GG --> HH["Update Read Status"]
+    HH --> II["Analytics Update"]
+    
+    JJ["Failed Delivery"] --> KK["Retry Logic"]
+    KK --> LL{"Retry Attempts < Max?"}
+    LL -->|Yes| MM["Schedule Retry"]
+    LL -->|No| NN["Mark as Failed"]
+    MM --> O
+    NN --> DD

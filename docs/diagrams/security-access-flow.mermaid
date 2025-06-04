@@ -1,0 +1,50 @@
+graph TD
+    A["User Request"] --> B["Authentication Check"]
+    B --> C{"Authenticated?"}
+    C -->|No| D["Redirect to Login"]
+    C -->|Yes| E["Extract User Role"]
+    
+    E --> F["Check Resource Permissions"]
+    F --> G{"Authorized?"}
+    G -->|No| H["Access Denied (403)"]
+    G -->|Yes| I["Log Access Attempt"]
+    
+    I --> J["Rate Limiting Check"]
+    J --> K{"Within Rate Limits?"}
+    K -->|No| L["Rate Limit Exceeded (429)"]
+    K -->|Yes| M["Process Request"]
+    
+    M --> N["Data Access Control"]
+    N --> O["Apply Data Filters"]
+    O --> P["Return Filtered Data"]
+    
+    P --> Q["Log Successful Access"]
+    Q --> R["Update User Activity"]
+    
+    S["Security Monitoring"] --> T["Detect Anomalies"]
+    T --> U{"Suspicious Activity?"}
+    U -->|Yes| V["Security Alert"]
+    U -->|No| W["Continue Monitoring"]
+    
+    V --> X["Block Suspicious IP"]
+    X --> Y["Notify Security Team"]
+    Y --> Z["Investigate Incident"]
+    
+    AA["Password Reset"] --> BB["Verify Identity"]
+    BB --> CC["Generate Reset Token"]
+    CC --> DD["Send Secure Link"]
+    DD --> EE["User Clicks Link"]
+    EE --> FF["Validate Token"]
+    FF --> GG{"Valid Token?"}
+    GG -->|No| HH["Invalid/Expired Link"]
+    GG -->|Yes| II["Allow Password Reset"]
+    II --> JJ["Update Password Hash"]
+    JJ --> KK["Invalidate All Sessions"]
+    KK --> LL["Force Re-login"]
+    
+    MM["Session Management"] --> NN["Check Session Validity"]
+    NN --> OO{"Session Valid?"}
+    OO -->|No| PP["Clear Session"]
+    OO -->|Yes| QQ["Extend Session"]
+    PP --> D
+    QQ --> RR["Update Last Activity"]

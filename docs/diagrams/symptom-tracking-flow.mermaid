@@ -1,0 +1,37 @@
+graph TD
+    A["Patient Reports Symptom"] --> B["Select Symptom Category"]
+    B --> C["Rate Severity (1-10)"]
+    C --> D["Add Description"]
+    D --> E["Identify Triggers"]
+    E --> F["Note Medications Taken"]
+    F --> G["Submit Symptom Entry"]
+    
+    G --> H["Validate Input Data"]
+    H --> I["Store in Database"]
+    I --> J["Update Patient Timeline"]
+    J --> K["Calculate Severity Trends"]
+    K --> L["Check Alert Thresholds"]
+    
+    L --> M{"Severity Alert?"}
+    M -->|Yes| N["Create Critical Alert"]
+    M -->|No| O["Normal Processing"]
+    
+    N --> P["Notify Navigator"]
+    P --> Q["Escalate to Doctor if Needed"]
+    Q --> R["Update Patient Status"]
+    
+    O --> S["Update Analytics"]
+    S --> T["Generate Trend Reports"]
+    T --> U["Update Dashboard Widgets"]
+    
+    U --> V["Patient Dashboard"]
+    U --> W["Navigator Dashboard"]
+    U --> X["Doctor Portal"]
+    
+    Y["Automated Symptom Reminders"] --> Z["Check Last Entry Date"]
+    Z --> AA{"Overdue Entry?"}
+    AA -->|Yes| BB["Send Reminder Notification"]
+    AA -->|No| CC["Schedule Next Check"]
+    
+    BB --> DD["Patient Receives Reminder"]
+    DD --> A

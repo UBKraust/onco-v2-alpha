@@ -1,0 +1,35 @@
+graph TD
+    A["User Visits Platform"] --> B{"Authenticated?"}
+    B -->|No| C["Login Page"]
+    B -->|Yes| D["Role Detection"]
+    
+    C --> E["Enter Credentials"]
+    E --> F{"Valid Credentials?"}
+    F -->|No| G["Show Error Message"]
+    G --> C
+    F -->|Yes| H["Set Authentication Token"]
+    H --> I["Determine User Role"]
+    
+    I --> J{"Role Type"}
+    J -->|Patient| K["Patient Dashboard"]
+    J -->|Navigator| L["Navigator Dashboard"]
+    J -->|Admin| M["Admin Dashboard"]
+    J -->|Caregiver| N["Caregiver Dashboard"]
+    
+    D --> J
+    
+    O["Register New User"] --> P["Fill Registration Form"]
+    P --> Q["Select Role"]
+    Q --> R{"Role Validation"}
+    R -->|Valid| S["Create Account"]
+    R -->|Invalid| T["Show Validation Error"]
+    T --> P
+    S --> U["Send Verification Email"]
+    U --> V["Account Created Successfully"]
+    V --> C
+    
+    W["Forgot Password"] --> X["Enter Email"]
+    X --> Y["Send Reset Link"]
+    Y --> Z["Check Email"]
+    Z --> AA["Reset Password"]
+    AA --> C

@@ -1,0 +1,52 @@
+graph TD
+    A["Medical Dashboard"] --> B["API Gateway"]
+    
+    B --> C["Hospital Information System"]
+    B --> D["Electronic Health Records"]
+    B --> E["Laboratory Systems"]
+    B --> F["Pharmacy Systems"]
+    B --> G["Insurance Systems"]
+    B --> H["Telemedicine Platforms"]
+    
+    C --> I["Patient Demographics"]
+    C --> J["Admission Records"]
+    C --> K["Discharge Summaries"]
+    
+    D --> L["Medical History"]
+    D --> M["Treatment Plans"]
+    D --> N["Clinical Notes"]
+    
+    E --> O["Lab Results"]
+    E --> P["Test Orders"]
+    E --> Q["Reference Ranges"]
+    
+    F --> R["Medication Lists"]
+    F --> S["Prescription History"]
+    F --> T["Drug Interactions"]
+    
+    G --> U["Coverage Verification"]
+    G --> V["Claims Processing"]
+    G --> W["Prior Authorizations"]
+    
+    H --> X["Video Consultations"]
+    H --> Y["Remote Monitoring"]
+    H --> Z["Digital Prescriptions"]
+    
+    AA["Data Synchronization"] --> BB["Scheduled Sync Jobs"]
+    BB --> CC["Real-time Webhooks"]
+    CC --> DD["Event-driven Updates"]
+    
+    DD --> EE["Data Validation"]
+    EE --> FF["Conflict Resolution"]
+    FF --> GG["Data Mapping"]
+    GG --> HH["Local Database Update"]
+    
+    II["Error Handling"] --> JJ["Retry Mechanisms"]
+    JJ --> KK["Fallback Procedures"]
+    KK --> LL["Manual Intervention"]
+    LL --> MM["Error Logging"]
+    
+    NN["Security & Compliance"] --> OO["HIPAA Compliance"]
+    OO --> PP["Data Encryption"]
+    PP --> QQ["Audit Trails"]
+    QQ --> RR["Access Controls"]

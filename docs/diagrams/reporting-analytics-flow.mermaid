@@ -1,0 +1,54 @@
+graph TD
+    A["Data Collection"] --> B["Patient Interactions"]
+    A --> C["System Events"]
+    A --> D["Medical Records"]
+    A --> E["Appointment Data"]
+    
+    B --> F["User Activity Tracking"]
+    C --> G["System Performance Metrics"]
+    D --> H["Clinical Data Processing"]
+    E --> I["Scheduling Analytics"]
+    
+    F --> J["Data Aggregation Service"]
+    G --> J
+    H --> J
+    I --> J
+    
+    J --> K["Data Warehouse"]
+    K --> L["ETL Processing"]
+    L --> M["Data Validation"]
+    M --> N["Data Transformation"]
+    
+    N --> O["Analytics Engine"]
+    O --> P["Statistical Analysis"]
+    O --> Q["Trend Analysis"]
+    O --> R["Predictive Modeling"]
+    
+    P --> S["Patient Outcome Reports"]
+    Q --> T["Performance Dashboards"]
+    R --> U["Risk Assessment Reports"]
+    
+    S --> V["Clinical Reports"]
+    T --> W["Operational Reports"]
+    U --> X["Predictive Reports"]
+    
+    V --> Y["Doctor Dashboard"]
+    W --> Z["Admin Dashboard"]
+    X --> AA["Navigator Dashboard"]
+    
+    BB["Report Generation"] --> CC["Select Report Type"]
+    CC --> DD["Set Parameters"]
+    DD --> EE["Query Data Warehouse"]
+    EE --> FF["Generate Visualizations"]
+    FF --> GG["Format Report"]
+    GG --> HH["Export Options"]
+    
+    HH --> II["PDF Export"]
+    HH --> JJ["Excel Export"]
+    HH --> KK["Email Delivery"]
+    HH --> LL["Dashboard Widget"]
+    
+    MM["Real-time Analytics"] --> NN["Stream Processing"]
+    NN --> OO["Live Dashboards"]
+    OO --> PP["Alert Generation"]
+    PP --> QQ["Notification Service"]

@@ -1,0 +1,56 @@
+graph TB
+    subgraph "Frontend Layer"
+        A["React Components"]
+        B["State Management"]
+        C["API Client"]
+        D["Local Storage"]
+    end
+    
+    subgraph "API Layer"
+        E["Next.js API Routes"]
+        F["Authentication Middleware"]
+        G["Data Validation"]
+        H["Error Handling"]
+    end
+    
+    subgraph "Business Logic"
+        I["Patient Service"]
+        J["Navigator Service"]
+        K["Admin Service"]
+        L["Notification Service"]
+        M["Document Service"]
+    end
+    
+    subgraph "Data Layer"
+        N["Database"]
+        O["File Storage"]
+        P["Cache Layer"]
+        Q["External APIs"]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    C --> E
+    
+    E --> F
+    F --> G
+    G --> H
+    E --> I
+    E --> J
+    E --> K
+    E --> L
+    E --> M
+    
+    I --> N
+    J --> N
+    K --> N
+    L --> P
+    M --> O
+    
+    I --> Q
+    J --> Q
+    K --> Q
+    
+    N --> P
+    O --> P

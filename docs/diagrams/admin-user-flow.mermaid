@@ -1,0 +1,53 @@
+graph TD
+    A["Admin Login"] --> B["Admin Dashboard"]
+    
+    B --> C["User Management"]
+    B --> D["System Configuration"]
+    B --> E["Reports & Analytics"]
+    B --> F["Medical Team Management"]
+    B --> G["System Monitoring"]
+    B --> H["Security & Audit"]
+    
+    C --> C1["View All Users"]
+    C --> C2["Create New User"]
+    C --> C3["Edit User"]
+    C --> C4["Deactivate User"]
+    C --> C5["User Permissions"]
+    
+    C2 --> C6["Select User Role"]
+    C6 --> C7["Enter User Details"]
+    C7 --> C8["Assign Permissions"]
+    C8 --> C9["Send Invitation"]
+    
+    C3 --> C10["Update Profile"]
+    C3 --> C11["Change Role"]
+    C3 --> C12["Reset Password"]
+    
+    D --> D1["System Settings"]
+    D --> D2["Integration Settings"]
+    D --> D3["Notification Settings"]
+    D --> D4["Backup Configuration"]
+    
+    E --> E1["User Analytics"]
+    E --> E2["System Performance"]
+    E --> E3["Patient Metrics"]
+    E --> E4["Financial Reports"]
+    E --> E5["Custom Reports"]
+    
+    F --> F1["View Medical Staff"]
+    F --> F2["Add New Staff"]
+    F --> F3["Manage Schedules"]
+    F --> F4["Department Management"]
+    F --> F5["Specialization Assignment"]
+    
+    G --> G1["System Health"]
+    G --> G2["Server Monitoring"]
+    G --> G3["Database Status"]
+    G --> G4["Error Logs"]
+    G --> G5["Performance Metrics"]
+    
+    H --> H1["Access Logs"]
+    H --> H2["Security Events"]
+    H --> H3["Compliance Reports"]
+    H --> H4["Data Privacy"]
+    H --> H5["Audit Trail"]

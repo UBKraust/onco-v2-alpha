@@ -1,0 +1,44 @@
+graph TD
+    A["Document Upload Initiated"] --> B["Select File"]
+    B --> C["Validate File Type"]
+    C --> D{"Valid File?"}
+    D -->|No| E["Show Error Message"]
+    D -->|Yes| F["Check File Size"]
+    
+    F --> G{"Size Within Limits?"}
+    G -->|No| H["Compress or Reject"]
+    G -->|Yes| I["Upload to Temporary Storage"]
+    
+    I --> J["Extract Metadata"]
+    J --> K["Virus Scan"]
+    K --> L{"Clean File?"}
+    L -->|No| M["Quarantine & Alert"]
+    L -->|Yes| N["Process Document"]
+    
+    N --> O["OCR Text Extraction"]
+    O --> P["Categorize Document"]
+    P --> Q["Generate Thumbnail"]
+    Q --> R["Move to Permanent Storage"]
+    
+    R --> S["Update Database"]
+    S --> T["Index for Search"]
+    T --> U["Create Access Log"]
+    U --> V["Notify Relevant Users"]
+    
+    V --> W["Patient Notification"]
+    V --> X["Navigator Notification"]
+    V --> Y["Doctor Notification"]
+    
+    Z["Document Access Request"] --> AA["Check User Permissions"]
+    AA --> BB{"Authorized?"}
+    BB -->|No| CC["Access Denied"]
+    BB -->|Yes| DD["Log Access Attempt"]
+    DD --> EE["Retrieve Document"]
+    EE --> FF["Apply Watermark if Needed"]
+    FF --> GG["Serve Document"]
+    
+    HH["Document Sharing"] --> II["Select Recipients"]
+    II --> JJ["Set Permissions"]
+    JJ --> KK["Generate Secure Link"]
+    KK --> LL["Send Notifications"]
+    LL --> MM["Track Access"]
