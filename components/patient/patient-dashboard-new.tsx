@@ -12,18 +12,47 @@ import { PatientMessagesCard } from "./patient-messages-card"
 import { PatientAnalysisCard } from "./patient-analysis-card"
 
 export function PatientDashboardNew() {
+  // Mock patient data
+  const patientData = {
+    name: "Maria Popescu",
+    age: 45,
+    diagnosis: "Limfom Non-Hodgkin",
+    avatar: "/avatar-placeholder.png",
+    nextAppointment: {
+      date: "15 Ianuarie 2025",
+      time: "10:30",
+      doctor: "Dr. Emily Carter",
+      type: "Consultație Oncologie",
+    },
+    treatment: {
+      name: "Chimioterapie R-CHOP",
+      cycle: "3/6",
+      progress: 50,
+      status: "Activ",
+    },
+    adherence: 85,
+    wellbeingScore: 7.2,
+    unreadMessages: 2,
+    activeAlerts: 1,
+  }
+
   return (
     <div className="space-y-6">
       {/* Header cu informații pacient și acțiuni rapide */}
       <PatientQuickActions />
 
-      {/* Overview Stats */}
-      <PatientOverviewStats />
+      {/* Overview Stats - now with proper props */}
+      <PatientOverviewStats
+        nextAppointment={patientData.nextAppointment}
+        adherence={patientData.adherence}
+        unreadMessages={patientData.unreadMessages}
+        activeAlerts={patientData.activeAlerts}
+      />
 
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
-          <PatientTreatmentCard />
+          <PatientTreatmentCard treatment={patientData.treatment} />
           <PatientAppointmentsCard />
         </div>
 
@@ -36,7 +65,7 @@ export function PatientDashboardNew() {
         <PatientObjectivesCard />
 
         <div className="xl:col-span-2 space-y-6">
-          <PatientMessagesCard />
+          <PatientMessagesCard unreadCount={patientData.unreadMessages} />
           <PatientAnalysisCard />
         </div>
       </div>

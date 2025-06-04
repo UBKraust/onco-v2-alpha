@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Activity, Calendar, Pill, TrendingUp } from "lucide-react"
+import { Pill, Calendar, Clock } from "lucide-react"
 
-interface TreatmentData {
+interface Treatment {
   name: string
   cycle: string
   progress: number
@@ -14,116 +14,57 @@ interface TreatmentData {
 }
 
 interface PatientTreatmentCardProps {
-  treatment: TreatmentData
+  treatment: Treatment
 }
 
 export function PatientTreatmentCard({ treatment }: PatientTreatmentCardProps) {
-  const medications = [
-    { name: "Rituximab", dose: "375 mg/m²", frequency: "Ziua 1", status: "Administrat" },
-    { name: "Cyclophosphamide", dose: "750 mg/m²", frequency: "Ziua 1", status: "Administrat" },
-    { name: "Doxorubicin", dose: "50 mg/m²", frequency: "Ziua 1", status: "Programat" },
-    { name: "Vincristine", dose: "1.4 mg/m²", frequency: "Ziua 1", status: "Programat" },
-  ]
-
-  const supportMeds = [
-    { name: "Ondansetron", type: "Antiemetic", status: "Activ" },
-    { name: "Filgrastim", type: "Factor creștere", status: "Programat" },
-  ]
-
   return (
     <Card className="rounded-2xl">
       <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Pill className="h-5 w-5 text-blue-600" />
+          Tratament Activ
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-violet-600" />
-            Tratament Activ
-          </CardTitle>
-          <Badge
-            variant={treatment.status === "Activ" ? "default" : "secondary"}
-            className="bg-green-100 text-green-800 hover:bg-green-200"
-          >
+          <div>
+            <h3 className="font-semibold text-lg">{treatment.name}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Ciclul {treatment.cycle}</p>
+          </div>
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
             {treatment.status}
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Treatment Overview */}
-        <div className="bg-violet-50 dark:bg-violet-900/20 p-4 rounded-xl">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-violet-900 dark:text-violet-100">{treatment.name}</h3>
-            <span className="text-sm font-medium text-violet-700 dark:text-violet-300">Ciclu {treatment.cycle}</span>
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-violet-700 dark:text-violet-300">Progres tratament</span>
-              <span className="font-medium text-violet-900 dark:text-violet-100">{treatment.progress}%</span>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Progres tratament</span>
+            <span className="font-medium">{treatment.progress}%</span>
+          </div>
+          <Progress value={treatment.progress} className="h-2" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Calendar className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium">Următoarea doză</span>
             </div>
-            <Progress value={treatment.progress} className="h-2" />
+            <p className="text-sm text-blue-700 dark:text-blue-300">Mâine, 09:00</p>
           </div>
-
-          <div className="flex items-center gap-4 mt-4 text-sm text-violet-700 dark:text-violet-300">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              Următorul ciclu: 28 Ian 2025
+          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="h-4 w-4 text-purple-600" />
+              <span className="text-sm font-medium">Durata rămasă</span>
             </div>
-            <div className="flex items-center gap-1">
-              <TrendingUp className="h-4 w-4" />
-              Răspuns bun
-            </div>
+            <p className="text-sm text-purple-700 dark:text-purple-300">12 săptămâni</p>
           </div>
         </div>
 
-        {/* Current Medications */}
-        <div>
-          <h4 className="font-medium mb-3 flex items-center gap-2">
-            <Pill className="h-4 w-4 text-blue-600" />
-            Medicația Principală
-          </h4>
-          <div className="space-y-2">
-            {medications.map((med, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div>
-                  <div className="font-medium text-sm">{med.name}</div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {med.dose} • {med.frequency}
-                  </div>
-                </div>
-                <Badge
-                  variant={med.status === "Administrat" ? "default" : "outline"}
-                  className={
-                    med.status === "Administrat" ? "bg-green-100 text-green-800" : "border-orange-200 text-orange-800"
-                  }
-                >
-                  {med.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Support Medications */}
-        <div>
-          <h4 className="font-medium mb-3 text-sm text-gray-700 dark:text-gray-300">Medicație de Suport</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {supportMeds.map((med, index) => (
-              <div key={index} className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
-                <div className="font-medium text-blue-900 dark:text-blue-100">{med.name}</div>
-                <div className="text-xs text-blue-700 dark:text-blue-300">{med.type}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            Vezi Detalii Complete
-          </Button>
-          <Button size="sm" className="flex-1">
-            Raportează Efecte Adverse
-          </Button>
-        </div>
+        <Button variant="outline" className="w-full">
+          Vezi Detalii Tratament
+        </Button>
       </CardContent>
     </Card>
   )
