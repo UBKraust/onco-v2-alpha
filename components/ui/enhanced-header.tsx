@@ -28,7 +28,7 @@ export function EnhancedHeader({ onMenuToggle, isMenuOpen }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-colors duration-200">
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className="w-full max-w-none flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left Section */}
         <div className="flex items-center gap-4">
           {/* Mobile Menu Toggle */}
