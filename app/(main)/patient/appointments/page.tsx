@@ -1,130 +1,143 @@
+"use client"
+
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, MapPin, Plus } from "lucide-react"
+import { AppointmentCard } from "@/components/ui/appointment-card"
+import { CalendarView } from "@/components/ui/calendar-view"
+import { AppointmentScheduler } from "@/components/appointments/appointment-scheduler"
+import { useMockPatientAppointments } from "@/hooks/useMockPatientAppointments"
+import type { Appointment } from "@/types/patient"
+import { AlertTriangle } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 export default function AppointmentsPage() {
+  const { appointments: allAppointments, isLoading, error } = useMockPatientAppointments()
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date)
+  }
+
+  const handleAppointmentClick = (appointment: Appointment) => {
+    toast({
+      title: `Programare Selectată: ${appointment.title}`,
+      description: `${appointment.date} la ${appointment.time} cu ${appointment.doctor}`,
+    })
+  }
+
+  const getAppointmentsForSelectedDate = () => {
+    if (!selectedDate) return []
+    const dateStr = selectedDate.toISOString().split("T")[0]
+    return allAppointments.filter((apt) => apt.date === dateStr)
+  }
+
+  const upcomingAppointments = allAppointments
+    .filter((apt) => new Date(apt.date) >= new Date() && (apt.status === "Confirmat" || apt.status === "În așteptare"))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  const selectedDateAppointments = getAppointmentsForSelectedDate()
+
+  // Map status for AppointmentCard
+  const mapStatusForAppointmentCard = (
+    status: Appointment["status"],
+  ): "scheduled" | "completed" | "cancelled" | "pending" => {
+    switch (status) {
+      case "Confirmat":
+        return "scheduled"
+      case "În așteptare":
+        return "pending"
+      case "Anulat":
+        return "cancelled"
+      case "Finalizat":
+        return "completed"
+      default:
+        return "pending"
+    }
+  }
+
+  if (isLoading) {
+    return <div>Se încarcă programările...</div> // Ideal ar fi un skeleton loader
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-red-500">
+        <AlertTriangle className="w-16 h-16 mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">Eroare la încărcarea programărilor</h2>
+        <p>{error.message}</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Programări</h1>
-          <p className="text-muted-foreground">Gestionează programările tale medicale</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Programările Mele</h1>
+          <p className="text-muted-foreground">Vizualizează și gestionează programările tale medicale.</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Programare Nouă
-        </Button>
+        <AppointmentScheduler />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        {/* Calendar View */}
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Programări Viitoare</CardTitle>
-              <CardDescription>Următoarele tale programări medicale</CardDescription>
+              <CardTitle>Calendar Programări</CardTitle>
+              <CardDescription>Selectează o zi pentru a vedea programările.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {[
-                {
-                  title: "Control Oncologic",
-                  doctor: "Dr. Emily Carter",
-                  date: "Mâine",
-                  time: "10:00",
-                  location: "Clinica de Oncologie, Et.2, Cam.302",
-                  status: "Confirmat",
-                  type: "control",
-                },
-                {
-                  title: "Ședința de Chimioterapie #3",
-                  doctor: "Centrul de Cancer",
-                  date: "28 Oct",
-                  time: "14:00",
-                  location: "Secția Oncologie",
-                  status: "Confirmat",
-                  type: "tratament",
-                },
-                {
-                  title: "Consultație Nutriționist",
-                  doctor: "Sarah Miller, RD",
-                  date: "2 Nov",
-                  time: "11:30",
-                  location: "Întâlnire virtuală",
-                  status: "În așteptare",
-                  type: "consultatie",
-                },
-              ].map((appointment, index) => (
-                <Card key={index} className="border-l-4 border-l-blue-500">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2">
-                        <h3 className="font-semibold">{appointment.title}</h3>
-                        <p className="text-sm text-muted-foreground">{appointment.doctor}</p>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <div className="flex items-center">
-                            <Calendar className="mr-1 h-4 w-4" />
-                            {appointment.date}
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="mr-1 h-4 w-4" />
-                            {appointment.time}
-                          </div>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="mr-1 h-4 w-4" />
-                          {appointment.location}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Badge variant={appointment.status === "Confirmat" ? "default" : "secondary"}>
-                          {appointment.status}
-                        </Badge>
-                        <div className="flex space-x-1">
-                          <Button variant="outline" size="sm">
-                            Detalii
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Reprogramează
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <CardContent>
+              <CalendarView
+                appointments={allAppointments}
+                onDateSelect={handleDateSelect}
+                onAppointmentClick={handleAppointmentClick}
+              />
             </CardContent>
           </Card>
         </div>
 
+        {/* Selected Date Appointments / Upcoming Appointments */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Calendar</CardTitle>
+              <CardTitle>
+                {selectedDate
+                  ? `Programări pentru ${selectedDate.toLocaleDateString("ro-RO", { day: "numeric", month: "long" })}`
+                  : "Programări Viitoare"}
+              </CardTitle>
+              <CardDescription>
+                {selectedDate ? "Detalii pentru ziua selectată." : "Cele mai apropiate programări."}
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="text-muted-foreground">Calendar widget (placeholder)</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Statistici</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Programări luna aceasta:</span>
-                <span className="font-bold">8</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Programări confirmate:</span>
-                <span className="font-bold text-green-600">6</span>
-              </div>
-              <div className="flex justify-between">
-                <span>În așteptare:</span>
-                <span className="font-bold text-yellow-600">2</span>
-              </div>
+            <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+              {(selectedDate ? selectedDateAppointments : upcomingAppointments).length > 0 ? (
+                (selectedDate ? selectedDateAppointments : upcomingAppointments).map((apt) => (
+                  <AppointmentCard
+                    key={apt.id}
+                    id={apt.id}
+                    title={apt.title}
+                    doctor={apt.doctor}
+                    specialty={apt.specialty}
+                    date={new Date(apt.date).toLocaleDateString("ro-RO", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    time={apt.time}
+                    location={apt.location}
+                    status={mapStatusForAppointmentCard(apt.status)}
+                    notes={apt.notes}
+                    priority={apt.priority}
+                    onReschedule={(id) => toast({ title: `Reprogramează: ${id}` })}
+                    onCancel={(id) => toast({ title: `Anulează: ${id}`, variant: "destructive" })}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground">
+                  {selectedDate ? "Nicio programare pentru această zi." : "Nicio programare viitoare."}
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>

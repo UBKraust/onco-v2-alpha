@@ -38,18 +38,20 @@ export function CalendarView({ appointments, onAppointmentClick, onDateSelect }:
     onDateSelect?.(day.date)
   }
 
-  const getAppointmentTypeColor = (type: string) => {
+  const getAppointmentTypeColor = (type: Appointment["type"]) => {
     switch (type) {
-      case "consultation":
-        return "bg-blue-100 text-blue-800"
-      case "treatment":
-        return "bg-red-100 text-red-800"
+      case "consultatie":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+      case "tratament":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
       case "test":
-        return "bg-green-100 text-green-800"
-      case "follow-up":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+      case "control":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+      case "urgenta":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
     }
   }
 
@@ -155,24 +157,29 @@ export function CalendarView({ appointments, onAppointmentClick, onDateSelect }:
             </h4>
             {calendarDays
               .find((day) => day.date.getTime() === selectedDate.getTime())
-              ?.appointments.map((appointment) => (
-                <div
-                  key={appointment.id}
-                  className="flex items-center justify-between p-3 border rounded-lg mb-2 cursor-pointer hover:bg-gray-50"
-                  onClick={() => onAppointmentClick?.(appointment)}
-                >
-                  <div>
-                    <div className="font-medium">{appointment.title}</div>
-                    <div className="text-sm text-muted-foreground">{appointment.doctor}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {appointment.time} • {appointment.location}
+              ?.appointments.map((appointment) => {
+                let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary"
+                if (appointment.status === "Confirmat") badgeVariant = "default"
+                else if (appointment.status === "Anulat") badgeVariant = "destructive"
+                else if (appointment.status === "Finalizat") badgeVariant = "outline"
+
+                return (
+                  <div
+                    key={appointment.id}
+                    className="flex items-center justify-between p-3 border dark:border-gray-700 rounded-lg mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => onAppointmentClick?.(appointment)}
+                  >
+                    <div>
+                      <div className="font-medium">{appointment.title}</div>
+                      <div className="text-sm text-muted-foreground">{appointment.doctor}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {appointment.time} • {appointment.location}
+                      </div>
                     </div>
+                    <Badge variant={badgeVariant}>{appointment.status}</Badge>
                   </div>
-                  <Badge variant={appointment.status === "confirmed" ? "default" : "secondary"}>
-                    {appointment.status === "confirmed" ? "Confirmat" : "În așteptare"}
-                  </Badge>
-                </div>
-              )) || <p className="text-muted-foreground">Nu există programări pentru această zi.</p>}
+                )
+              }) || <p className="text-muted-foreground">Nu există programări pentru această zi.</p>}
           </CardContent>
         </Card>
       )}

@@ -29,12 +29,15 @@ export interface Appointment {
   id: string
   title: string
   doctor: string
-  date: string
-  time: string
+  specialty: string
+  date: string // YYYY-MM-DD format, e.g., "2024-07-15"
+  time: string // HH:MM format, e.g., "10:30"
   location: string
-  type: "consultation" | "treatment" | "test" | "follow-up"
-  status: "confirmed" | "pending" | "cancelled" | "completed"
+  status: "Confirmat" | "În așteptare" | "Anulat" | "Finalizat"
+  type: "control" | "tratament" | "consultatie" | "test" | "urgenta" | "default"
   notes?: string
+  priority?: "low" | "normal" | "high" | "urgent"
+  description?: string
 }
 
 export interface Symptom {
