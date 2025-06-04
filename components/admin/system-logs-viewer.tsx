@@ -157,7 +157,7 @@ export function SystemLogsViewer({ logs, onClearLogs }: SystemLogsViewerProps) {
                 <div key={log.id} className="border rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant={getLevelColor(log.level)}>{log.level.toUpperCase()}</Badge>
+                      <Badge variant={getLevelColor(log.level) as any}>{log.level.toUpperCase()}</Badge>
                       <Badge variant="secondary" className={getCategoryColor(log.category)}>
                         {log.category}
                       </Badge>

@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SystemMetricsDashboard } from "@/components/admin/system-metrics-dashboard"
 import { SystemLogsViewer } from "@/components/admin/system-logs-viewer"
 import { BackupManager } from "@/components/admin/backup-manager"
-import { SystemConfiguration } from "@/components/admin/system-configuration"
+import { SystemConfig } from "@/components/admin/system-configuration"
 import { SecurityEventsMonitor } from "@/components/admin/security-events-monitor"
 import { useSystemData } from "@/hooks/useSystemData"
 import { Loader2 } from "lucide-react"
@@ -60,7 +60,7 @@ export default function AdminSystemPage() {
         </TabsContent>
 
         <TabsContent value="config" className="space-y-6">
-          <SystemConfiguration configurations={configurations} onUpdateConfiguration={updateConfiguration} />
+          <SystemConfig configurations={configurations} onUpdateConfiguration={updateConfiguration} />
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">

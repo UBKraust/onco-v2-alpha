@@ -122,7 +122,7 @@ export function BackupManager({ backups, onTriggerBackup }: BackupManagerProps) 
                       <div className="flex items-center gap-2">
                         {getStatusIcon(backup.status)}
                         <span className="font-medium capitalize">{backup.type}</span>
-                        <Badge variant={getStatusColor(backup.status)}>{backup.status}</Badge>
+                        <Badge variant={getStatusColor(backup.status) as any}>{backup.status}</Badge>
                       </div>
                       <div className="flex items-center gap-2">
                         {backup.status === "completed" && (

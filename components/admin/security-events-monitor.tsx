@@ -110,7 +110,7 @@ export function SecurityEventsMonitor({ events, onResolveEvent }: SecurityEvents
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {getSeverityIcon(event.severity)}
-                        <Badge variant={getSeverityColor(event.severity)}>{event.severity.toUpperCase()}</Badge>
+                        <Badge variant={getSeverityColor(event.severity) as any}>{event.severity.toUpperCase()}</Badge>
                         <Badge variant="outline">{getTypeLabel(event.type)}</Badge>
                       </div>
                       <Button size="sm" onClick={() => onResolveEvent(event.id)}>
