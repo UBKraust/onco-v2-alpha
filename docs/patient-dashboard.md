@@ -1,173 +1,163 @@
-# Patient Dashboard - Documentație UI/UX
+# Patient Dashboard Documentation
 
-## Prezentare Generală
-Dashboard-ul Pacient oferă acces la dosarul medical, monitorizarea simptomelor, programări și comunicarea cu echipa medicală.
+## Overview
+The Patient Dashboard serves as the primary interface for patients to monitor their health status, access medical records, track symptoms, manage appointments, and communicate with their healthcare team.
 
-## Structura Dashboard-ului
+## Design Principles
+- **Patient-centered**: Focus on the patient's needs and journey
+- **Clarity**: Present information in a clear, understandable manner
+- **Accessibility**: Ensure all features are accessible to users with disabilities
+- **Consistency**: Maintain consistent design patterns throughout the interface
+- **Hierarchy**: Organize information by importance and relevance
 
-### 1. Header Section cu Avatar
-- **Layout**: `flex items-center justify-between`
-- **Titlu**: "Dashboard Principal" (text-3xl font-bold)
-- **Subtitlu**: "Bine ai revenit! Aici găsești un rezumat al activității medicale."
-- **Avatar Section**:
-  - Avatar 48x48px (`w-12 h-12`)
-  - Nume utilizator: "Maria Popescu"
-  - Status: "Utilizator Activ"
-  - Culoare avatar: `bg-pink-500`
+## Color Scheme
+- **Primary**: Pink (`pink-500`, `pink-600`) - Used for primary actions and patient-specific elements
+- **Secondary**: Various contextual colors for different sections
+- **Background**: White for cards, light gray (`bg-gray-100`) for page backgrounds
+- **Text**: Dark gray for primary text, medium gray for secondary text
+- **Accents**:
+  - Green (`green-500`, `green-600`) for success states and positive indicators
+  - Red (`red-500`, `red-600`) for alerts and critical information
+  - Yellow (`yellow-500`, `yellow-600`) for warnings
+  - Blue (`blue-500`, `blue-600`) for information
 
-### 2. Quick Stats (Grid 4 coloane)
-\`\`\`
-Grid Layout: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6
-\`\`\`
+## Typography
+- **Headings**: 
+  - H1: 24px (3xl), font-bold
+  - H2: 20px (2xl), font-semibold
+  - H3: 18px (xl), font-semibold
+  - H4: 16px (lg), font-medium
+- **Body**: 
+  - Regular: 16px (base)
+  - Small: 14px (sm)
+  - Extra small: 12px (xs)
+- **Font Family**: Default system font stack via Tailwind
 
-#### Card-uri incluse:
-1. **Programări**
-   - Icon: Calendar
-   - Valoare: 3
-   - Info: Următoarea: Mâine la 10:00
+## Components
 
-2. **Documente**
-   - Icon: FileText
-   - Valoare: 12
-   - Info: Ultimul adăugat ieri
+### Cards
+- Standard card with `CardHeader`, `CardTitle`, `CardDescription`, and `CardContent`
+- Cards should have consistent padding (p-6)
+- Hover effects: `hover:shadow-lg hover:scale-105` for interactive cards
+- Border: `border-2` with contextual hover colors (e.g., `hover:border-pink-200`)
 
-3. **Activitate**
-   - Icon: Activity
-   - Valoare: 5
-   - Info: Înregistrări astăzi
+### Buttons
+- Primary: Solid background, white text
+- Secondary: Outline style
+- Icon buttons: Include both icon and text for accessibility
+- Action buttons: Use appropriate icons to reinforce meaning
+- Size variants: Default, small (sm), and large (lg)
 
-4. **Notificări**
-   - Icon: Bell
-   - Valoare: 2
-   - Info: Noi mesaje
+### Navigation
+- Clear, descriptive labels
+- Active state indicators
+- Consistent icon usage
+- Grouped by functional area
 
-### 3. Main Content Grid (2 coloane)
-\`\`\`
-Grid Layout: grid-cols-1 lg:grid-cols-2 gap-6
-\`\`\`
+### Status Indicators
+- Badges with appropriate colors for different statuses
+- Icons to reinforce meaning
+- Clear, concise text labels
 
-#### Activitate Recentă
-- **Lista de activități** cu:
-  - Control Medical - Dr. Emily Carter (Badge "Mâine 10:00")
-  - Rezultate Analize - Laborator Central (Badge outline "Disponibile")
-  - Consultație Nutriționist - Sarah Miller, RD (Badge secondary)
+### Data Visualization
+- Progress bars for treatment progress
+- Simple charts for symptom tracking
+- Clear labels and legends
+- Accessible color combinations
 
-#### Sarcini Zilnice
-- **Checklist** cu:
-  - CheckCircle icon pentru sarcini complete
-  - Checkbox gol pentru sarcini incomplete
-  - Text cu line-through pentru sarcini finalizate
+## Layout Guidelines
+- **Grid System**: Use Tailwind's grid system with responsive breakpoints
+- **Spacing**: Consistent spacing using Tailwind's spacing scale
+- **Card Layout**: 
+  - Single column on mobile
+  - Two columns on tablet
+  - Three or four columns on desktop
+- **Section Organization**: Group related information in clearly defined sections
+- **Responsive Behavior**: 
+  - Stack elements vertically on mobile
+  - Use horizontal layouts on larger screens
+  - Hide secondary information on smaller screens
 
-### 4. Quick Actions Section
-\`\`\`
-Grid Layout: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4
-\`\`\`
+## Interaction Patterns
+- **Hover States**: Subtle scaling and shadow effects
+- **Active States**: Clear visual feedback for active elements
+- **Loading States**: Use skeleton loaders for content loading
+- **Transitions**: Smooth transitions between states (300ms duration)
+- **Feedback**: Immediate visual feedback for user actions
 
-#### Butoane de acțiune:
-1. **Monitorizare Simptome** - Primary button (h-20 flex-col)
-2. **Programări** - Outline button
-3. **Dosar Medical** - Outline button
-4. **Resurse** - Outline button
+## Accessibility Guidelines
+- **Color Contrast**: Maintain WCAG AA compliance (minimum 4.5:1 for normal text)
+- **Keyboard Navigation**: Ensure all interactive elements are keyboard accessible
+- **Screen Readers**: Provide appropriate ARIA labels and descriptions
+- **Focus Indicators**: Visible focus states for keyboard navigation
+- **Alternative Text**: For all images and icons
+- **Semantic HTML**: Use appropriate HTML elements for their semantic meaning
 
-### 5. Navigation Cards (Grid 3 coloane)
-\`\`\`
-Grid Layout: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-\`\`\`
+## Responsive Design Rules
+- **Mobile First**: Design for mobile first, then enhance for larger screens
+- **Breakpoints**:
+  - sm: 640px
+  - md: 768px
+  - lg: 1024px
+  - xl: 1280px
+- **Adaptations**:
+  - Single column layouts on mobile
+  - Reduced padding and margins on smaller screens
+  - Simplified navigation on mobile
+  - Hidden or collapsed secondary information on smaller screens
 
-#### Card-uri de navigare cu hover effects:
-1. **Dashboard Pacient** (Pink theme)
-2. **Dashboard Navigator** (Blue theme)
-3. **Dashboard Administrator** (Purple theme)
-4. **Dashboard Îngrijitor** (Green theme)
-5. **Platformă Training** (Orange theme)
-6. **Design System** (Gray theme)
+## Component Usage Examples
 
-## Paleta de Culori Specifică
-
-### Patient Theme:
-- **Primary**: Pink (`bg-pink-500`, `text-pink-600`)
-- **Hover**: `hover:border-pink-200`, `group-hover:bg-pink-200`
-
-### Role-based Colors:
-- **Patient**: Pink (`from-pink-500 to-pink-600`)
-- **Navigator**: Blue (`from-blue-500 to-blue-600`)
-- **Admin**: Purple (`from-purple-500 to-purple-600`)
-- **Caregiver**: Green (`from-green-500 to-green-600`)
-- **Training**: Orange (`from-orange-500 to-orange-600`)
-- **Design**: Gray (`from-gray-500 to-gray-600`)
-
-## Componente UI Specifice
-
-### Avatar Component:
-\`\`\`typescript
-<Avatar className="w-12 h-12">
-  <AvatarImage src="/placeholder-user.jpg" />
-  <AvatarFallback className="bg-pink-500">MP</AvatarFallback>
-</Avatar>
-\`\`\`
-
-### Navigation Cards cu Hover:
-\`\`\`css
-hover:shadow-lg hover:scale-105 border-2 hover:border-{color}-200
-transition-all duration-200
-\`\`\`
-
-### Quick Action Buttons:
-- **Height**: `h-20` pentru butoane mari
-- **Layout**: `flex-col` pentru icon + text vertical
-- **Icon Size**: `h-6 w-6 mb-2`
-
-## Interactive Elements
-
-### Hover States:
-- **Cards**: Scale și shadow pe hover
-- **Buttons**: Color transitions
-- **Navigation**: Border color changes
-
-### Link Structure:
-\`\`\`typescript
-<Link href="/patient" className="group">
-  <Card className="hover:shadow-lg hover:scale-105">
-    // Card content
-  </Card>
-</Link>
+### Quick Stats Cards
+\`\`\`tsx
+<Card>
+  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <CardTitle className="text-sm font-medium">Programări</CardTitle>
+    <Calendar className="h-4 w-4 text-muted-foreground" />
+  </CardHeader>
+  <CardContent>
+    <div className="text-2xl font-bold">3</div>
+    <p className="text-xs text-muted-foreground">Următoarea: Mâine la 10:00</p>
+  </CardContent>
+</Card>
 \`\`\`
 
-### Icon + Text Pattern:
-- Iconuri în partea stângă: `mr-2 h-4 w-4`
-- Iconuri deasupra textului: `h-6 w-6 mb-2`
-- Arrow indicators: `ml-2 h-4 w-4`
+### Action Buttons
+\`\`\`tsx
+<Button asChild className="h-20 flex-col">
+  <Link href="/patient/symptoms">
+    <Activity className="h-6 w-6 mb-2" />
+    Monitorizare Simptome
+  </Link>
+</Button>
+\`\`\`
 
-## Layout Patterns
+### Status Badges
+\`\`\`tsx
+<Badge className="bg-green-600">Optimă</Badge>
+<Badge variant="outline">1,456</Badge>
+<Badge variant="secondary">Actualizate</Badge>
+\`\`\`
 
-### Responsive Breakpoints:
-- **Mobile**: Single column layout
-- **Tablet**: 2 columns pentru stats și content
-- **Desktop**: 4 columns pentru stats, 3 pentru navigation
+## Page Structure
+1. **Header**: Page title and user information
+2. **Quick Stats**: Key metrics in card format
+3. **Main Content**: Primary information and actions
+4. **Quick Actions**: Common tasks and shortcuts
+5. **Secondary Information**: Additional details and options
 
-### Spacing System:
-- **Container**: `space-y-6` între secțiuni majore
-- **Grid**: `gap-6` pentru spacing uniform
-- **Card Content**: `space-y-4` în interiorul card-urilor
-- **Inline Elements**: `space-x-2` pentru elemente orizontale
+## Do's and Don'ts
 
-## Accessibility Features
+### Do's
+- Use consistent spacing and alignment
+- Group related information together
+- Provide clear feedback for user actions
+- Use appropriate color coding for different states
+- Ensure all interactive elements are accessible
 
-### Semantic HTML:
-- Proper heading hierarchy (h1, h2, h3)
-- Link elements pentru navigare
-- Button elements pentru acțiuni
-
-### Visual Hierarchy:
-- Font sizes: `text-3xl` → `text-xl` → `text-sm`
-- Font weights: `font-bold` → `font-semibold` → `font-medium`
-- Color contrast pentru text și background
-
-## Reguli de Consistență
-
-1. **Icon Sizing**: 16px pentru UI elements, 24px pentru actions
-2. **Button Heights**: 20 (h-20) pentru quick actions, standard pentru altele
-3. **Card Hover**: Întotdeauna scale + shadow + border color
-4. **Color Themes**: Fiecare rol are culoarea sa specifică
-5. **Spacing**: Multipli de 4 (4, 6, 8, 12, etc.)
-6. **Typography**: Hierarchy clară cu contrast adecvat
+### Don'ts
+- Don't use colors inconsistently
+- Don't overcrowd the interface with too much information
+- Don't use low-contrast text
+- Don't rely solely on color to convey information
+- Don't use non-standard interaction patterns

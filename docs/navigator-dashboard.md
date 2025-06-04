@@ -1,151 +1,195 @@
-# Navigator Dashboard - Documentație UI/UX
+# Navigator Dashboard Documentation
 
-## Prezentare Generală
-Dashboard-ul Navigator este destinat gestionării pacienților și coordonării îngrijirii medicale.
+## Overview
+The Navigator Dashboard is designed for healthcare navigators who coordinate patient care, manage patient information, track appointments, monitor alerts, and facilitate communication between patients and the healthcare team.
 
-## Structura Dashboard-ului
+## Design Principles
+- **Efficiency**: Optimize for quick access to patient information and actions
+- **Organization**: Clear structure for managing multiple patients
+- **Prioritization**: Highlight urgent matters and critical information
+- **Clarity**: Present complex information in an understandable way
+- **Consistency**: Maintain consistent patterns across all navigator interfaces
 
-### 1. Header Section
-- **Titlu Principal**: "Dashboard Navigator" (text-blue-600)
-- **Subtitlu**: "Gestionează pacienții și coordonează îngrijirea medicală"
-- **Action Buttons**:
-  - Urgențe: `variant="outline"` cu Phone icon
-  - Mesaje: `bg-blue-500 hover:bg-blue-600` cu MessageSquare icon
+## Color Scheme
+- **Primary**: Blue (`blue-500`, `blue-600`) - Used for primary actions and navigator-specific elements
+- **Secondary**: Various contextual colors for different sections
+- **Background**: White for cards, light gray (`bg-gray-100`) for page backgrounds
+- **Text**: Dark gray for primary text, medium gray for secondary text
+- **Accents**:
+  - Green (`green-500`, `green-600`) for success states and positive indicators
+  - Red (`red-500`, `red-600`) for alerts and critical information
+  - Yellow (`yellow-500`, `yellow-600`) for warnings
+  - Purple (`purple-500`, `purple-600`) for special features
 
-### 2. Tab Navigation
-\`\`\`
-TabsList: grid w-full grid-cols-7
-\`\`\`
+## Typography
+- **Headings**: 
+  - H1: 24px (3xl), font-bold, text-blue-600 for main dashboard title
+  - H2: 20px (2xl), font-semibold
+  - H3: 18px (xl), font-semibold
+  - H4: 16px (lg), font-medium
+- **Body**: 
+  - Regular: 16px (base)
+  - Small: 14px (sm)
+  - Extra small: 12px (xs)
+- **Font Family**: Default system font stack via Tailwind
 
-#### Tab-uri incluse:
-1. **Prezentare** - Users icon
-2. **Pacienți** - Users icon
-3. **Alerte** - AlertTriangle icon
-4. **Calendar** - Calendar icon
-5. **Note** - FileText icon
-6. **Simptome** - Activity icon
-7. **Setări** - Settings icon
+## Components
 
-### 3. KPI Cards (Grid 4 coloane)
-\`\`\`
-Grid Layout: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6
-\`\`\`
+### Tabs
+- Used for main navigation within the dashboard
+- Clear, descriptive labels with icons
+- Active tab indicator
+- Responsive behavior (scrollable on mobile)
 
-#### Card-uri incluse:
-1. **Pacienți Activi**
-   - Icon: Users
-   - Valoare: 24
-   - Trend: +2 față de luna trecută
-
-2. **Programări Astăzi**
-   - Icon: Calendar
-   - Valoare: 8
-   - Info: Următoarea la 10:30
-
-3. **Alerte Critice**
-   - Icon: AlertTriangle
-   - Valoare: 3 (text-red-600)
-   - Status: Necesită atenție imediată
-
-4. **Aderență Medie**
-   - Icon: TrendingUp
-   - Valoare: 87% (text-green-600)
-   - Trend: +5% față de săptămâna trecută
-
-### 4. Main Content Areas
-
-#### Pacienți cu Prioritate Înaltă
-- **Lista de pacienți** cu:
-  - Nume pacient
-  - Condiție medicală
-  - Prioritate (Badge cu culori semantice)
-  - Ultimul contact
-  - Buton "Contactează"
-
-#### Activitate Recentă
-- **Timeline** cu:
-  - Indicator colorat (w-2 h-2 bg-blue-500 rounded-full)
-  - Acțiune efectuată
-  - Pacient și timp
-
-## Tab Content Specific
-
-### Overview Tab
-- Componenta `NavigatorOverview`
-- Callback pentru selectarea pacientului
-
-### Patients Tab
-- Componenta `PatientManagement`
-- Funcționalitate de gestionare pacienți
-
-### Alerts Tab
-- Componenta `AlertsManagement`
-- Gestionarea alertelor critice
-
-### Calendar Tab
-- Componenta `CalendarAppointmentsView`
-- Vizualizare programări
-
-### Notes Tab
-- Componenta `PatientNotesManager`
-- Gestionarea notelor pacienților
-
-### Symptoms Tab
-- Componenta `EnhancedSymptomsTracker`
-- Monitorizarea simptomelor
-
-### Settings Tab
-- **Grid 2 coloane** pentru setări:
-  - Notificări (Alerte critice, Email zilnic, SMS urgențe)
-  - Preferințe (Mod întunecat, Actualizare automată, Limba)
-
-## Paleta de Culori Specifică
-
-### Navigator Theme:
-- **Primary**: `text-blue-600` pentru titlu
-- **Buttons**: `bg-blue-500 hover:bg-blue-600`
-- **Success**: `text-green-600` pentru metrici pozitive
-- **Alert**: `text-red-600` pentru alerte critice
-
-### Badge Variants:
-- **Destructive**: Pentru prioritate critică
-- **Default**: Pentru prioritate înaltă
-- **Secondary**: Pentru prioritate medie
-
-## Componente UI Specifice
-
-### Tab System:
-- `Tabs`, `TabsContent`, `TabsList`, `TabsTrigger`
-- Iconuri integrate în tab-uri
-- State management pentru tab activ
-
-### Patient Cards:
-- Layout flex pentru informații pacient
-- Badge-uri pentru prioritate
-- Butoane de acțiune integrate
-
-### Activity Timeline:
-- Indicatori vizuali colorați
-- Informații structurate (acțiune • pacient • timp)
-- Spațiere consistentă
-
-## State Management
-
-### Patient Selection:
-\`\`\`typescript
-const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
-const [activeTab, setActiveTab] = useState("overview")
+\`\`\`tsx
+<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+  <TabsList className="grid w-full grid-cols-7">
+    <TabsTrigger value="overview" className="flex items-center gap-2">
+      <Users className="h-4 w-4" />
+      Prezentare
+    </TabsTrigger>
+    <!-- Additional tabs -->
+  </TabsList>
+  <TabsContent value="overview" className="space-y-4">
+    <NavigatorOverview onSelectPatient={handleSelectPatient} />
+  </TabsContent>
+  <!-- Additional tab content -->
+</Tabs>
 \`\`\`
 
-### Navigation Logic:
-- Selectarea pacientului schimbă tab-ul la "patient-details"
-- Buton "Înapoi" pentru revenirea la overview
-- Callback-uri pentru comunicarea între componente
+### Patient Lists
+- Clear patient information with status indicators
+- Action buttons for common tasks
+- Sorting and filtering options
+- Pagination for large lists
 
-## Reguli de Interacțiune
+### Alert Cards
+- Color-coded by severity
+- Clear, concise information
+- Timestamp and context
+- Action buttons for resolution
 
-1. **Tab Navigation**: Click pe tab schimbă conținutul
-2. **Patient Selection**: Click pe pacient deschide detaliile
-3. **Back Navigation**: Buton explicit pentru întoarcere
-4. **Action Buttons**: Hover states și feedback vizual
-5. **Real-time Updates**: Componente care se actualizează automat
+### Calendar View
+- Clear date and time indicators
+- Color-coded by appointment type
+- Patient information
+- Quick actions (reschedule, cancel)
+
+### Patient Detail View
+- Comprehensive patient information
+- Tabbed interface for different categories
+- Action buttons for common tasks
+- Status indicators and history
+
+## Layout Guidelines
+- **Grid System**: Use Tailwind's grid system with responsive breakpoints
+- **Spacing**: Consistent spacing using Tailwind's spacing scale
+- **Card Layout**: 
+  - Single column on mobile
+  - Two columns on tablet
+  - Multiple columns on desktop
+- **Section Organization**: Group related information in clearly defined sections
+- **Responsive Behavior**: 
+  - Simplified views on mobile
+  - More detailed layouts on larger screens
+  - Collapsible sections for complex information
+
+## Interaction Patterns
+- **Hover States**: Subtle scaling and shadow effects
+- **Active States**: Clear visual feedback for active elements
+- **Loading States**: Use skeleton loaders for content loading
+- **Transitions**: Smooth transitions between states (300ms duration)
+- **Feedback**: Immediate visual feedback for user actions
+- **Confirmation**: Confirm potentially destructive actions
+
+## Accessibility Guidelines
+- **Color Contrast**: Maintain WCAG AA compliance (minimum 4.5:1 for normal text)
+- **Keyboard Navigation**: Ensure all interactive elements are keyboard accessible
+- **Screen Readers**: Provide appropriate ARIA labels and descriptions
+- **Focus Indicators**: Visible focus states for keyboard navigation
+- **Alternative Text**: For all images and icons
+- **Semantic HTML**: Use appropriate HTML elements for their semantic meaning
+
+## Responsive Design Rules
+- **Mobile First**: Design for mobile first, then enhance for larger screens
+- **Breakpoints**:
+  - sm: 640px
+  - md: 768px
+  - lg: 1024px
+  - xl: 1280px
+- **Adaptations**:
+  - Simplified navigation on mobile (hamburger menu)
+  - Stacked layouts on smaller screens
+  - Reduced information density on mobile
+  - Prioritized content on smaller screens
+
+## Component Usage Examples
+
+### Patient Card
+\`\`\`tsx
+<Card className="hover:shadow-md transition-shadow">
+  <CardHeader className="pb-2">
+    <div className="flex justify-between">
+      <CardTitle>Maria Popescu</CardTitle>
+      <PatientStatusBadge status="active" />
+    </div>
+    <CardDescription>ID: 12345 • 45 ani</CardDescription>
+  </CardHeader>
+  <CardContent className="pb-2">
+    <div className="space-y-2">
+      <div className="flex justify-between text-sm">
+        <span className="text-muted-foreground">Diagnostic:</span>
+        <span className="font-medium">Cancer de sân</span>
+      </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-muted-foreground">Tratament:</span>
+        <span className="font-medium">Chimioterapie (Ciclu 2/6)</span>
+      </div>
+    </div>
+  </CardContent>
+  <CardFooter className="pt-2">
+    <Button size="sm" className="w-full">Vezi Detalii</Button>
+  </CardFooter>
+</Card>
+\`\`\`
+
+### Alert Item
+\`\`\`tsx
+<div className="flex items-center justify-between p-3 border rounded-lg">
+  <div className="flex items-center space-x-3">
+    <AlertTriangle className="h-4 w-4 text-red-600" />
+    <div>
+      <p className="text-sm font-medium">Simptome severe</p>
+      <p className="text-xs text-muted-foreground">Maria Popescu a raportat simptome severe</p>
+    </div>
+  </div>
+  <div className="flex items-center space-x-2">
+    <Badge variant="destructive">Critic</Badge>
+    <Clock className="h-3 w-3 text-muted-foreground" />
+    <span className="text-xs text-muted-foreground">Acum 30 min</span>
+  </div>
+</div>
+\`\`\`
+
+## Page Structure
+1. **Header**: Page title and quick actions
+2. **Tabs Navigation**: Main sections of the dashboard
+3. **Content Area**: Dynamic content based on selected tab
+4. **Patient Details**: Comprehensive patient information when selected
+5. **Settings**: Configuration options for the navigator dashboard
+
+## Do's and Don'ts
+
+### Do's
+- Prioritize critical information and alerts
+- Provide clear patient status indicators
+- Enable efficient navigation between patients
+- Offer quick access to common actions
+- Maintain consistent information hierarchy
+
+### Don'ts
+- Don't overwhelm with too much information at once
+- Don't hide critical alerts or notifications
+- Don't use ambiguous status indicators
+- Don't require excessive clicks for common actions
+- Don't use inconsistent terminology or icons
