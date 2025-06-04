@@ -22,6 +22,7 @@ import {
 import { useCurrentRole } from "@/hooks/use-current-role"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useRef } from "react"
 
 interface SidebarProps {
   isOpen: boolean
@@ -34,36 +35,42 @@ const patientNavItems = [
     href: "/patient",
     icon: Home,
     badge: null,
+    description: "Pagina principală cu informații generale",
   },
   {
     title: "Dosar Medical",
     href: "/patient/medical-file",
     icon: FileText,
     badge: null,
+    description: "Dosarul medical complet",
   },
   {
     title: "Simptome",
     href: "/patient/symptoms",
     icon: Activity,
     badge: "2",
+    description: "Urmărirea simptomelor, 2 simptome noi",
   },
   {
     title: "Programări",
     href: "/patient/appointments",
     icon: Calendar,
     badge: null,
+    description: "Programările medicale",
   },
   {
     title: "Mesaje",
     href: "/patient/messages",
     icon: MessageSquare,
     badge: "3",
+    description: "Mesaje cu echipa medicală, 3 mesaje noi",
   },
   {
     title: "Resurse",
     href: "/patient/resources",
     icon: BookOpen,
     badge: null,
+    description: "Resurse educaționale și informații",
   },
 ]
 
@@ -73,36 +80,42 @@ const navigatorNavItems = [
     href: "/navigator-dashboard",
     icon: Home,
     badge: null,
+    description: "Pagina principală navigator",
   },
   {
     title: "Pacienți",
     href: "/navigator/patients",
     icon: Users,
     badge: "12",
+    description: "Lista pacienților, 12 pacienți activi",
   },
   {
     title: "Programări",
     href: "/navigator/appointments",
     icon: Calendar,
     badge: null,
+    description: "Gestionarea programărilor",
   },
   {
     title: "Alerte",
     href: "/navigator/alerts",
     icon: AlertTriangle,
     badge: "5",
+    description: "Alerte medicale, 5 alerte active",
   },
   {
     title: "Rapoarte",
     href: "/navigator/reports",
     icon: BarChart3,
     badge: null,
+    description: "Rapoarte și statistici",
   },
   {
     title: "Mesaje",
     href: "/navigator/messages",
     icon: MessageSquare,
     badge: "8",
+    description: "Mesaje cu pacienții, 8 mesaje noi",
   },
 ]
 
@@ -112,30 +125,35 @@ const adminNavItems = [
     href: "/admin",
     icon: Home,
     badge: null,
+    description: "Pagina principală administrator",
   },
   {
     title: "Utilizatori",
     href: "/admin/users",
     icon: Users,
     badge: null,
+    description: "Gestionarea utilizatorilor",
   },
   {
     title: "Sistem",
     href: "/admin/system",
     icon: Settings,
     badge: null,
+    description: "Configurări sistem",
   },
   {
     title: "Rapoarte",
     href: "/admin/reports",
     icon: BarChart3,
     badge: null,
+    description: "Rapoarte administrative",
   },
 ]
 
 export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
   const { currentRole, roleConfig } = useCurrentRole()
   const pathname = usePathname()
+  const sidebarRef = useRef<HTMLElement>(null)
 
   const getNavItems = () => {
     switch (currentRole) {
@@ -152,25 +170,51 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
 
   const navItems = getNavItems()
 
+  // Announce sidebar state changes to screen readers
+  useEffect(() => {
+    const announcement = isOpen ? "Meniul de navigare a fost deschis" : "Meniul de navigare a fost închis"
+    const announcer = document.createElement("div")
+    announcer.setAttribute("aria-live", "polite")
+    announcer.setAttribute("aria-atomic", "true")
+    announcer.className = "sr-only"
+    announcer.textContent = announcement
+    document.body.appendChild(announcer)
+
+    setTimeout(() => {
+      document.body.removeChild(announcer)
+    }, 1000)
+  }, [isOpen])
+
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden" onClick={onToggle} />}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          onClick={onToggle}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Sidebar */}
       <aside
+        ref={sidebarRef}
         className={cn(
           "fixed left-0 top-0 z-50 h-screen w-64 transform border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ease-in-out md:relative md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full md:w-16",
         )}
+        role="navigation"
+        aria-label="Navigare principală"
+        aria-expanded={isOpen}
+        id="main-navigation"
       >
         <div className="flex h-full flex-col">
           {/* Integrated Header */}
           <div className="flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur px-4">
             {isOpen ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" role="img" aria-label="Logo OncoLink">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Activity className="h-4 w-4" />
+                  <Activity className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div>
                   <span className="font-semibold text-sm">OncoLink</span>
@@ -178,19 +222,35 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                 </div>
               </div>
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground mx-auto">
-                <Activity className="h-4 w-4" />
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground mx-auto"
+                role="img"
+                aria-label="Logo OncoLink"
+              >
+                <Activity className="h-4 w-4" aria-hidden="true" />
               </div>
             )}
 
-            <Button variant="ghost" size="icon" onClick={onToggle} className="h-8 w-8 md:flex hidden">
-              {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggle}
+              className="h-8 w-8 md:flex hidden"
+              aria-label={isOpen ? "Restrânge meniul" : "Extinde meniul"}
+              aria-expanded={isOpen}
+              aria-controls="main-navigation"
+            >
+              {isOpen ? (
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              )}
             </Button>
           </div>
 
           {/* Role Indicator */}
           {isOpen && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4" role="region" aria-label="Informații rol utilizator">
               <div
                 className={cn(
                   "rounded-lg p-3 text-white",
@@ -200,9 +260,9 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                 )}
               >
                 <div className="flex items-center gap-2">
-                  {currentRole === "patient" && <Heart className="h-5 w-5" />}
-                  {currentRole === "navigator" && <Stethoscope className="h-5 w-5" />}
-                  {currentRole === "admin" && <Settings className="h-5 w-5" />}
+                  {currentRole === "patient" && <Heart className="h-5 w-5" aria-hidden="true" />}
+                  {currentRole === "navigator" && <Stethoscope className="h-5 w-5" aria-hidden="true" />}
+                  {currentRole === "admin" && <Settings className="h-5 w-5" aria-hidden="true" />}
                   <div>
                     <p className="font-medium">{roleConfig.displayName}</p>
                     <p className="text-xs opacity-90">
@@ -218,7 +278,7 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
 
           {/* Navigation */}
           <ScrollArea className="flex-1 px-3">
-            <nav className="space-y-2">
+            <nav className="space-y-2" role="list" aria-label="Meniu principal de navigare">
               {navItems.map((item, index) => {
                 const isActive = pathname === item.href
                 const Icon = item.icon
@@ -230,6 +290,7 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                     style={{
                       animationDelay: `${index * 50}ms`,
                     }}
+                    role="listitem"
                   >
                     <Link href={item.href}>
                       <Button
@@ -242,10 +303,16 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                             "bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-r-4 border-primary shadow-lg shadow-primary/20",
                           !isOpen && "justify-center px-2 w-12 mx-auto",
                         )}
+                        aria-current={isActive ? "page" : undefined}
+                        aria-label={`${item.title}${item.badge ? `, ${item.badge} elemente noi` : ""}`}
+                        aria-describedby={`nav-desc-${index}`}
                       >
                         {/* Active indicator */}
                         {isActive && (
-                          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-primary/50 rounded-r-full" />
+                          <div
+                            className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-primary/50 rounded-r-full"
+                            aria-hidden="true"
+                          />
                         )}
 
                         {/* Icon with animation */}
@@ -262,11 +329,15 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                               isActive && "text-primary drop-shadow-sm",
                               "group-hover:text-primary",
                             )}
+                            aria-hidden="true"
                           />
 
                           {/* Glow effect for active item */}
                           {isActive && (
-                            <div className="absolute inset-0 h-5 w-5 bg-primary/20 rounded-full blur-sm -z-10" />
+                            <div
+                              className="absolute inset-0 h-5 w-5 bg-primary/20 rounded-full blur-sm -z-10"
+                              aria-hidden="true"
+                            />
                           )}
                         </div>
 
@@ -293,6 +364,7 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                                   !isActive &&
                                     "bg-muted-foreground/20 text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary",
                                 )}
+                                aria-label={`${item.badge} elemente noi`}
                               >
                                 {item.badge}
                               </Badge>
@@ -301,13 +373,25 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                         )}
 
                         {/* Hover effect overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          aria-hidden="true"
+                        />
                       </Button>
                     </Link>
 
+                    {/* Hidden description for screen readers */}
+                    <div id={`nav-desc-${index}`} className="sr-only">
+                      {item.description}
+                    </div>
+
                     {/* Tooltip for collapsed state */}
                     {!isOpen && (
-                      <div className="absolute left-16 top-1/2 -translate-y-1/2 z-50 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none">
+                      <div
+                        className="absolute left-16 top-1/2 -translate-y-1/2 z-50 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none"
+                        role="tooltip"
+                        aria-hidden="true"
+                      >
                         <div className="bg-popover text-popover-foreground px-3 py-2 rounded-md shadow-lg border text-sm font-medium whitespace-nowrap">
                           {item.title}
                           {item.badge && (
@@ -326,27 +410,31 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
 
             {/* Quick Actions Section */}
             {isOpen && (
-              <div className="mt-8 pt-4 border-t border-border/50">
+              <div className="mt-8 pt-4 border-t border-border/50" role="region" aria-label="Acțiuni rapide">
                 <div className="px-2 mb-3">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Acțiuni Rapide</p>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1" role="list">
                   {currentRole === "patient" && (
                     <>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start gap-2 h-9 text-xs hover:bg-green-500/10 hover:text-green-600"
+                        aria-label="Raportează un simptom nou"
+                        role="listitem"
                       >
-                        <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                        <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" aria-hidden="true" />
                         Raportează Simptom
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start gap-2 h-9 text-xs hover:bg-blue-500/10 hover:text-blue-600"
+                        aria-label="Solicită o programare urgentă"
+                        role="listitem"
                       >
-                        <div className="h-2 w-2 bg-blue-500 rounded-full" />
+                        <div className="h-2 w-2 bg-blue-500 rounded-full" aria-hidden="true" />
                         Programare Urgentă
                       </Button>
                     </>
@@ -358,16 +446,20 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start gap-2 h-9 text-xs hover:bg-orange-500/10 hover:text-orange-600"
+                        aria-label="Creează o alertă nouă"
+                        role="listitem"
                       >
-                        <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
+                        <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" aria-hidden="true" />
                         Alertă Nouă
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start gap-2 h-9 text-xs hover:bg-purple-500/10 hover:text-purple-600"
+                        aria-label="Generează un raport rapid"
+                        role="listitem"
                       >
-                        <div className="h-2 w-2 bg-purple-500 rounded-full" />
+                        <div className="h-2 w-2 bg-purple-500 rounded-full" aria-hidden="true" />
                         Raport Rapid
                       </Button>
                     </>
@@ -379,7 +471,7 @@ export function DarkModeSidebar({ isOpen, onToggle }: SidebarProps) {
 
           {/* Footer */}
           {isOpen && (
-            <div className="p-4 border-t">
+            <div className="p-4 border-t" role="contentinfo" aria-label="Informații aplicație">
               <div className="text-center text-xs text-muted-foreground">
                 <p>OncoLink Platform</p>
                 <p className="mt-1">v2.1.0</p>

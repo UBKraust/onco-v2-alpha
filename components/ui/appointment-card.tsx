@@ -45,17 +45,25 @@ export function AppointmentCard({
       label: "Programată",
       color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
       icon: Calendar,
+      announcement: "Programare confirmată",
     },
     completed: {
       label: "Finalizată",
       color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       icon: CheckCircle,
+      announcement: "Programare finalizată",
     },
-    cancelled: { label: "Anulată", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", icon: XCircle },
+    cancelled: {
+      label: "Anulată",
+      color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      icon: XCircle,
+      announcement: "Programare anulată",
+    },
     pending: {
       label: "În așteptare",
       color: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
       icon: AlertCircle,
+      announcement: "Programare în așteptare de confirmare",
     },
   }
 
@@ -68,6 +76,19 @@ export function AppointmentCard({
   }
 
   const StatusIcon = statusConfig[status].icon
+  const currentStatus = statusConfig[status]
+  const currentPriority = priorityConfig[priority]
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("ro-RO", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  }
+
+  const canModify = status === "scheduled" || status === "pending"
 
   return (
     <Card
@@ -76,51 +97,65 @@ export function AppointmentCard({
         "hover:shadow-lg",
         "border border-border",
         "dark:border-dark-border",
+        "focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2",
         className,
       )}
+      role="article"
+      aria-labelledby={`appointment-title-${id}`}
+      aria-describedby={`appointment-details-${id}`}
     >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <Badge className={statusConfig[status].color}>
-            <StatusIcon className="mr-1 h-3 w-3" />
-            {statusConfig[status].label}
+          <CardTitle id={`appointment-title-${id}`} className="text-lg">
+            {title}
+          </CardTitle>
+          <Badge className={currentStatus.color} aria-label={`Status programare: ${currentStatus.announcement}`}>
+            <StatusIcon className="mr-1 h-3 w-3" aria-hidden="true" />
+            {currentStatus.label}
           </Badge>
         </div>
         <CardDescription className="flex items-center gap-1">
-          <User className="h-3 w-3" />
-          {doctor} • <span className="text-xs">{specialty}</span>
+          <User className="h-3 w-3" aria-hidden="true" />
+          <span aria-label={`Medic: ${doctor}, Specialitate: ${specialty}`}>
+            {doctor} • <span className="text-xs">{specialty}</span>
+          </span>
         </CardDescription>
       </CardHeader>
+
       <CardContent className="pb-2">
-        <div className="grid gap-2">
+        <div id={`appointment-details-${id}`} className="grid gap-2" role="group" aria-label="Detalii programare">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{date}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span aria-label={`Data programării: ${formatDate(date)}`}>{date}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{time}</span>
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span aria-label={`Ora programării: ${time}`}>{time}</span>
           </div>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span>{location}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span aria-label={`Locația: ${location}`}>{location}</span>
           </div>
           {notes && (
             <div className="flex items-start gap-2 mt-2">
-              <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <p className="text-sm text-muted-foreground">{notes}</p>
+              <FileText className="h-4 w-4 text-muted-foreground mt-0.5" aria-hidden="true" />
+              <p className="text-sm text-muted-foreground" aria-label={`Note programare: ${notes}`}>
+                {notes}
+              </p>
             </div>
           )}
           {priority && (
             <div className="mt-2">
-              <Badge className={priorityConfig[priority].color}>Prioritate: {priorityConfig[priority].label}</Badge>
+              <Badge className={currentPriority.color} aria-label={`Prioritate programare: ${currentPriority.label}`}>
+                Prioritate: {currentPriority.label}
+              </Badge>
             </div>
           )}
         </div>
       </CardContent>
-      {(status === "scheduled" || status === "pending") && (
-        <CardFooter className="pt-2 flex gap-2">
+
+      {canModify && (
+        <CardFooter className="pt-2 flex gap-2" role="group" aria-label="Acțiuni programare">
           {onReschedule && (
             <Button
               variant="outline"
@@ -136,6 +171,7 @@ export function AppointmentCard({
                 "dark:active:bg-secondary dark:active:text-secondary-foreground",
                 "dark:disabled:bg-muted dark:disabled:text-muted-foreground",
               )}
+              aria-label={`Reprogramează programarea ${title} din ${date} la ${time}`}
             >
               Reprogramează
             </Button>
@@ -156,6 +192,7 @@ export function AppointmentCard({
                 "dark:active:bg-red-900 dark:active:text-red-200",
                 "dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:disabled:border-muted",
               )}
+              aria-label={`Anulează programarea ${title} din ${date} la ${time}`}
             >
               Anulează
             </Button>
