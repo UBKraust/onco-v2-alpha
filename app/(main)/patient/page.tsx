@@ -1,7 +1,7 @@
 "use client"
 
-import { PatientDashboard } from "@/components/patient/patient-dashboard"
+import { PatientDashboardNew } from "@/components/patient/patient-dashboard-new"
 
-export default function PatientDashboardPage() {
-  return <PatientDashboard />
+export default function PatientPage() {
+  return <PatientDashboardNew />
 }
