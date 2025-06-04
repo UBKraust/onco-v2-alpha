@@ -7,7 +7,7 @@ import { BackupManager } from "@/components/admin/backup-manager"
 import { SystemConfiguration } from "@/components/admin/system-configuration"
 import { SecurityEventsMonitor } from "@/components/admin/security-events-monitor"
 import { useSystemData } from "@/hooks/useSystemData"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { Loader2 } from "lucide-react"
 
 export default function AdminSystemPage() {
   const {
@@ -26,7 +26,7 @@ export default function AdminSystemPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <LoadingSpinner />
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }

@@ -30,7 +30,7 @@ export interface SystemMetrics {
 export interface SystemLog {
   id: string
   timestamp: Date
-  level: "info" | "warning" | "error" | "debug"
+  level: "error" | "warning" | "info" | "debug"
   category: "auth" | "api" | "database" | "system" | "security"
   message: string
   details?: Record<string, any>
@@ -40,7 +40,7 @@ export interface SystemLog {
 
 export interface BackupStatus {
   id: string
-  type: "full" | "incremental" | "differential"
+  type: "full" | "incremental"
   status: "running" | "completed" | "failed" | "scheduled"
   startTime: Date
   endTime?: Date
@@ -72,3 +72,5 @@ export interface SecurityEvent {
   timestamp: Date
   resolved: boolean
 }
+
+export type SystemConfigurationType = SystemConfiguration

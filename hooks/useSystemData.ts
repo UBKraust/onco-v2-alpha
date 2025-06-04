@@ -139,7 +139,28 @@ export function useSystemData() {
           updatedAt: new Date("2024-01-10"),
           updatedBy: "admin-1",
         },
-      ])
+        {
+          id: "config-4",
+          category: "notifications",
+          key: "email_notifications",
+          value: true,
+          description: "Activează notificările prin email",
+          type: "boolean",
+          updatedAt: new Date("2024-01-10"),
+          updatedBy: "admin-1",
+        },
+        {
+          id: "config-5",
+          category: "backup",
+          key: "backup_frequency",
+          value: "daily",
+          description: "Frecvența backup-urilor automate",
+          type: "select",
+          options: ["hourly", "daily", "weekly"],
+          updatedAt: new Date("2024-01-10"),
+          updatedBy: "admin-1",
+        },
+      ] as SystemConfiguration[])
 
       // Mock security events
       setSecurityEvents([

@@ -10,18 +10,18 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Settings, Save, RotateCcw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import type { SystemConfigurationType } from "@/types/system"
+import type { SystemConfiguration } from "@/types/system"
 
 interface SystemConfigurationProps {
-  configurations: SystemConfigurationType[]
+  configurations: SystemConfiguration[]
   onUpdateConfiguration: (id: string, value: string | number | boolean) => void
 }
 
-export function SystemConfiguration({ configurations, onUpdateConfiguration }: SystemConfigurationProps) {
+export function SystemConfig({ configurations, onUpdateConfiguration }: SystemConfigurationProps) {
   const [editingValues, setEditingValues] = useState<Record<string, any>>({})
   const { toast } = useToast()
 
-  const categories = Array.from(new Set(configurations.map((config) => config.category)))
+  const categories = ["general", "security", "notifications", "backup", "performance"]
 
   const handleValueChange = (configId: string, value: any) => {
     setEditingValues((prev) => ({
@@ -30,7 +30,7 @@ export function SystemConfiguration({ configurations, onUpdateConfiguration }: S
     }))
   }
 
-  const handleSave = (config: SystemConfigurationType) => {
+  const handleSave = (config: SystemConfiguration) => {
     const newValue = editingValues[config.id] ?? config.value
     onUpdateConfiguration(config.id, newValue)
     setEditingValues((prev) => {
@@ -50,7 +50,7 @@ export function SystemConfiguration({ configurations, onUpdateConfiguration }: S
     })
   }
 
-  const renderConfigInput = (config: SystemConfigurationType) => {
+  const renderConfigInput = (config: SystemConfiguration) => {
     const currentValue = editingValues[config.id] ?? config.value
     const hasChanges = editingValues[config.id] !== undefined
 
@@ -116,7 +116,17 @@ export function SystemConfiguration({ configurations, onUpdateConfiguration }: S
           <TabsList className="grid w-full grid-cols-5">
             {categories.map((category) => (
               <TabsTrigger key={category} value={category} className="capitalize">
-                {category}
+                {category === "general"
+                  ? "General"
+                  : category === "security"
+                    ? "Securitate"
+                    : category === "notifications"
+                      ? "Notificări"
+                      : category === "backup"
+                        ? "Backup"
+                        : category === "performance"
+                          ? "Performanță"
+                          : category}
               </TabsTrigger>
             ))}
           </TabsList>
