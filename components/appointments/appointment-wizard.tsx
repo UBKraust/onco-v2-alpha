@@ -220,7 +220,14 @@ export function AppointmentWizard({ patientId, patientName, onAppointmentCreated
     if (!selectedDoctorData || !date) return []
 
     const selectedDate = new Date(date)
-    const dayName = selectedDate.toLocaleDateString("en-US", { weekday: "lowercase" })
+    const dayName = selectedDate.toLocaleDateString("en-US", {
+      weekday: "lowercase",
+    }) as keyof typeof selectedDoctorData.availability
+
+    // Verificăm dacă availability există și dacă ziua există în availability
+    if (!selectedDoctorData.availability || !selectedDoctorData.availability[dayName]) {
+      return []
+    }
 
     return selectedDoctorData.availability[dayName] || []
   }
@@ -383,11 +390,17 @@ export function AppointmentWizard({ patientId, patientName, onAppointmentCreated
                     <SelectValue placeholder="Selectează ora" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getAvailableHours().map((hour) => (
-                      <SelectItem key={hour} value={hour}>
-                        {hour}
+                    {getAvailableHours().length > 0 ? (
+                      getAvailableHours().map((hour) => (
+                        <SelectItem key={hour} value={hour}>
+                          {hour}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>
+                        Nu sunt ore disponibile
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
