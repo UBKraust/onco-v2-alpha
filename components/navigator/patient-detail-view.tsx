@@ -32,6 +32,7 @@ import { PatientStatusBadge } from "./patient-status-badge"
 import { PatientStatusSelector } from "./patient-status-selector"
 import { PatientStatusHistory } from "./patient-status-history"
 import { usePatientStatus } from "@/hooks/usePatientStatus"
+import { PatientNotesManager } from "./patient-notes-manager"
 
 interface PatientDetailViewProps {
   patientId: string
@@ -43,6 +44,7 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
   const [activeTab, setActiveTab] = useState("overview")
   const { currentStatus, statusHistory, updateStatus } = usePatientStatus(patientId, "in-treatment")
   const [showStatusSelector, setShowStatusSelector] = useState(false)
+  const [showNotesManager, setShowNotesManager] = useState(false)
 
   const patient = getPatientDetail(patientId)
 
@@ -567,7 +569,7 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-4">Nu există documente încărcate</p>
-                  <Button>
+                  <Button onClick={() => setShowNotesManager(true)}>
                     <FileText className="mr-2 h-4 w-4" />
                     Upload primul document
                   </Button>
@@ -582,7 +584,7 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Note Clinice</span>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setShowNotesManager(true)}>
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Adaugă Notă
                 </Button>
@@ -653,7 +655,7 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
                 <div className="text-center py-8">
                   <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-4">Nu există note clinice</p>
-                  <Button>
+                  <Button onClick={() => setShowNotesManager(true)}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Adaugă prima notă
                   </Button>
@@ -854,7 +856,7 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions Bar pentru mobile */}
+      {/* Quick Actions Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 flex justify-center gap-2 md:hidden">
         <Button variant="outline" size="sm" className="flex-1">
           <Phone className="h-4 w-4" />
@@ -876,6 +878,26 @@ export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps)
         onOpenChange={setShowStatusSelector}
         onStatusChange={updateStatus}
       />
+      {showNotesManager && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Note Private Navigator</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowNotesManager(false)}>
+                ✕
+              </Button>
+            </div>
+            <div className="p-4">
+              <PatientNotesManager
+                patientId={patientId}
+                patientName={`${patient.firstName} ${patient.lastName}`}
+                currentNavigatorId="nav-1"
+                currentNavigatorName="Dr. Maria Ionescu"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
