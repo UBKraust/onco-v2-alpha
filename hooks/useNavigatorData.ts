@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Navigator, PatientAlert, NavigatorTask, PatientSummary, PerformanceMetrics } from "@/types/navigator"
 
 // Self-contained mock data to avoid import issues
@@ -51,6 +51,29 @@ const mockPatientSummaries: PatientSummary[] = [
       relationship: "Soție",
     },
   },
+  {
+    id: "3",
+    firstName: "Ana",
+    lastName: "Dumitrescu",
+    age: 52,
+    diagnosis: "Cancer de Sân",
+    stage: "II",
+    riskLevel: "critical",
+    lastContact: "2024-11-09 11:20",
+    nextAppointment: "2024-11-12 15:30",
+    adherenceScore: 78,
+    recentSymptoms: 5,
+    unreadMessages: 1,
+    activeAlerts: 2,
+    treatmentPhase: "Pre-operatorie",
+    navigator: "Ana Ionescu",
+    primaryPhysician: "Dr. Emily Carter",
+    emergencyContact: {
+      name: "Mihai Dumitrescu",
+      phone: "+40 123 456 792",
+      relationship: "Soț",
+    },
+  },
 ]
 
 const mockPatientAlerts: PatientAlert[] = [
@@ -67,6 +90,34 @@ const mockPatientAlerts: PatientAlert[] = [
     isResolved: false,
     assignedTo: "nav-001",
     escalationLevel: 1,
+  },
+  {
+    id: "alert-002",
+    patientId: "2",
+    patientName: "Ion Georgescu",
+    type: "warning",
+    category: "medication",
+    title: "Aderență medicație scăzută",
+    description: "Pacientul a ratat 2 doze consecutive în ultimele 3 zile.",
+    timestamp: "2024-11-10 14:20",
+    isRead: false,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 1,
+  },
+  {
+    id: "alert-003",
+    patientId: "3",
+    patientName: "Ana Dumitrescu",
+    type: "critical",
+    category: "symptoms",
+    title: "Simptome severe raportate",
+    description: "Pacientul raportează dureri intense și febră persistentă.",
+    timestamp: "2024-11-11 16:45",
+    isRead: false,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 2,
   },
 ]
 
@@ -103,7 +154,7 @@ const mockNavigatorTasks: NavigatorTask[] = [
     description: "Revizuiește și actualizează planul de tratament",
     patientId: "3",
     patientName: "Ana Dumitrescu",
-    priority: "high",
+    priority: "urgent",
     category: "treatment",
     dueDate: "2024-11-10 14:00",
     estimatedDuration: 45,
@@ -112,44 +163,12 @@ const mockNavigatorTasks: NavigatorTask[] = [
   },
 ]
 
-// Adaugă și mai multe alerte mock
-const additionalMockAlerts: PatientAlert[] = [
-  {
-    id: "alert-002",
-    patientId: "2",
-    patientName: "Ion Georgescu",
-    type: "warning",
-    category: "medication",
-    title: "Aderență medicație scăzută",
-    description: "Pacientul a ratat 2 doze consecutive în ultimele 3 zile.",
-    timestamp: "2024-11-10 14:20",
-    isRead: false,
-    isResolved: false,
-    assignedTo: "nav-001",
-    escalationLevel: 1,
-  },
-  {
-    id: "alert-003",
-    patientId: "3",
-    patientName: "Ana Dumitrescu",
-    type: "info",
-    category: "appointment",
-    title: "Programare confirmată",
-    description: "Pacientul a confirmat programarea pentru mâine la 10:00.",
-    timestamp: "2024-11-10 16:45",
-    isRead: true,
-    isResolved: false,
-    assignedTo: "nav-001",
-    escalationLevel: 0,
-  },
-]
-
 // Mock Navigator Data
 const mockNavigator: Navigator = {
   id: "nav-001",
   firstName: "Ana",
   lastName: "Ionescu",
-  email: "ana.ionescu@oncalink.ro",
+  email: "ana.ionescu@oncolink.ro",
   phone: "+40 123 456 789",
   specialization: "Oncologie",
   department: "Navigare Pacienți Oncologici",
@@ -181,11 +200,39 @@ const mockPerformanceMetrics: PerformanceMetrics = {
 }
 
 export function useNavigatorData() {
-  const [navigator] = useState<Navigator>(mockNavigator)
-  const [patients] = useState<PatientSummary[]>(mockPatientSummaries)
-  const [alerts, setAlerts] = useState<PatientAlert[]>([...mockPatientAlerts, ...additionalMockAlerts])
-  const [tasks, setTasks] = useState<NavigatorTask[]>(mockNavigatorTasks)
-  const [performanceMetrics] = useState<PerformanceMetrics>(mockPerformanceMetrics)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [navigator, setNavigator] = useState<Navigator | null>(null)
+  const [patients, setPatients] = useState<PatientSummary[]>([])
+  const [alerts, setAlerts] = useState<PatientAlert[]>([])
+  const [tasks, setTasks] = useState<NavigatorTask[]>([])
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null)
+
+  useEffect(() => {
+    // Simulate loading data
+    const loadData = async () => {
+      try {
+        setIsLoading(true)
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        setNavigator(mockNavigator)
+        setPatients(mockPatientSummaries)
+        setAlerts(mockPatientAlerts)
+        setTasks(mockNavigatorTasks)
+        setPerformanceMetrics(mockPerformanceMetrics)
+
+        setError(null)
+      } catch (err) {
+        setError("Failed to load navigator data")
+        console.error("Error loading navigator data:", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   // Funcții pentru gestionarea alertelor
   const markAlertAsRead = (alertId: string) => {
@@ -224,30 +271,34 @@ export function useNavigatorData() {
     }
   }
 
-  // Computed values
-  const criticalPatients = patients.filter((p) => p.riskLevel === "critical")
-  const highPriorityPatients = patients.filter((p) => p.riskLevel === "high" || p.riskLevel === "critical")
-  const unreadAlerts = alerts.filter((a) => !a.isRead)
-  const unresolvedAlerts = alerts.filter((a) => !a.isResolved)
-  const overdueTasks = tasks.filter((t) => t.status === "overdue")
-  const todayAppointments = patients.filter((p) => p.nextAppointment && p.nextAppointment.startsWith("2024-11-11"))
+  // Computed values - with safe fallbacks
+  const criticalPatients = patients?.filter((p) => p.riskLevel === "critical") || []
+  const highPriorityPatients = patients?.filter((p) => p.riskLevel === "high" || p.riskLevel === "critical") || []
+  const unreadAlerts = alerts?.filter((a) => !a.isRead) || []
+  const unresolvedAlerts = alerts?.filter((a) => !a.isResolved) || []
+  const overdueTasks = tasks?.filter((t) => t.status === "overdue") || []
+  const todayAppointments =
+    patients?.filter((p) => p.nextAppointment && p.nextAppointment.startsWith("2024-11-11")) || []
 
   // Statistici pentru dashboard
   const stats = {
-    totalPatients: patients.length,
-    criticalAlerts: alerts.filter((a) => a.type === "critical" && !a.isResolved).length,
-    pendingTasks: tasks.filter((t) => t.status === "pending").length,
+    totalPatients: patients?.length || 0,
+    criticalAlerts: alerts?.filter((a) => a.type === "critical" && !a.isResolved).length || 0,
+    pendingTasks: tasks?.filter((t) => t.status === "pending").length || 0,
     todayAppointments: todayAppointments.length,
-    averageAdherence: Math.round(patients.reduce((sum, p) => sum + p.adherenceScore, 0) / patients.length),
+    averageAdherence:
+      patients?.length > 0 ? Math.round(patients.reduce((sum, p) => sum + p.adherenceScore, 0) / patients.length) : 0,
     highRiskPatients: highPriorityPatients.length,
   }
 
   return {
-    navigator,
-    patients,
-    alerts,
-    tasks,
-    performanceMetrics,
+    isLoading,
+    error,
+    navigator: navigator || mockNavigator,
+    patients: patients || [],
+    alerts: alerts || [],
+    tasks: tasks || [],
+    performanceMetrics: performanceMetrics || mockPerformanceMetrics,
     stats,
     // Funcții
     markAlertAsRead,

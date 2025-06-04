@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Users,
   AlertTriangle,
@@ -25,6 +26,8 @@ interface NavigatorOverviewProps {
 
 export function NavigatorOverview({ onSelectPatient }: NavigatorOverviewProps) {
   const {
+    isLoading,
+    error,
     navigator,
     patients,
     criticalPatients,
@@ -36,7 +39,51 @@ export function NavigatorOverview({ onSelectPatient }: NavigatorOverviewProps) {
     performanceMetrics,
   } = useNavigatorData()
 
-  const capacityPercentage = (navigator.activePatients / navigator.maxCapacity) * 100
+  if (error) {
+    return (
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-red-500" />
+            <div>
+              <h3 className="font-semibold text-red-800">Eroare la încărcarea datelor</h3>
+              <p className="text-red-700">{error}</p>
+            </div>
+            <Button variant="outline" size="sm" className="ml-auto" onClick={() => window.location.reload()}>
+              Reîncarcă
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-16 h-16 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-16" />
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const capacityPercentage = navigator ? (navigator.activePatients / navigator.maxCapacity) * 100 : 0
 
   return (
     <div className="space-y-6">
@@ -46,19 +93,21 @@ export function NavigatorOverview({ onSelectPatient }: NavigatorOverviewProps) {
           <Avatar className="w-16 h-16">
             <AvatarImage src="/placeholder-navigator.jpg" />
             <AvatarFallback className="bg-blue-500 text-white text-lg">
-              {navigator.firstName[0]}
-              {navigator.lastName[0]}
+              {navigator?.firstName?.[0] || "N"}
+              {navigator?.lastName?.[0] || "N"}
             </AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-3xl font-bold text-blue-600">
-              Bine ai revenit, {navigator.firstName} {navigator.lastName}!
+              Bine ai revenit, {navigator?.firstName || "Navigator"} {navigator?.lastName || ""}!
             </h1>
             <p className="text-muted-foreground">
-              Navigator Medical • {navigator.specialization} • {navigator.experience} ani experiență
+              Navigator Medical • {navigator?.specialization || "Oncologie"} • {navigator?.experience || 0} ani
+              experiență
             </p>
             <p className="text-sm text-muted-foreground">
-              {navigator.activePatients}/{navigator.maxCapacity} pacienți activi • Ultima conectare: Azi, 08:00
+              {navigator?.activePatients || 0}/{navigator?.maxCapacity || 0} pacienți activi • Ultima conectare: Azi,
+              08:00
             </p>
           </div>
         </div>
@@ -102,7 +151,7 @@ export function NavigatorOverview({ onSelectPatient }: NavigatorOverviewProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{navigator.activePatients}</div>
+            <div className="text-2xl font-bold">{navigator?.activePatients || 0}</div>
             <div className="flex items-center gap-2 mt-2">
               <Progress value={capacityPercentage} className="flex-1" />
               <span className="text-xs text-muted-foreground">{Math.round(capacityPercentage)}%</span>
@@ -160,24 +209,30 @@ export function NavigatorOverview({ onSelectPatient }: NavigatorOverviewProps) {
             <TrendingUp className="h-5 w-5 text-green-500" />
             Performanță Curentă
           </CardTitle>
-          <CardDescription>Indicatori cheie de performanță pentru {performanceMetrics.period}</CardDescription>
+          <CardDescription>
+            Indicatori cheie de performanță pentru {performanceMetrics?.period || "perioada curentă"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{performanceMetrics.patientSatisfactionScore}/5</div>
+              <div className="text-2xl font-bold text-green-600">
+                {performanceMetrics?.patientSatisfactionScore || 0}/5
+              </div>
               <p className="text-sm text-muted-foreground">Satisfacție Pacienți</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{performanceMetrics.averageResponseTime}h</div>
+              <div className="text-2xl font-bold text-blue-600">{performanceMetrics?.averageResponseTime || 0}h</div>
               <p className="text-sm text-muted-foreground">Timp Răspuns Mediu</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{performanceMetrics.adherenceImprovementRate}%</div>
+              <div className="text-2xl font-bold text-purple-600">
+                {performanceMetrics?.adherenceImprovementRate || 0}%
+              </div>
               <p className="text-sm text-muted-foreground">Îmbunătățire Aderență</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">{performanceMetrics.completedTasks}</div>
+              <div className="text-2xl font-bold text-orange-600">{performanceMetrics?.completedTasks || 0}</div>
               <p className="text-sm text-muted-foreground">Sarcini Completate</p>
             </div>
           </div>
@@ -196,44 +251,53 @@ export function NavigatorOverview({ onSelectPatient }: NavigatorOverviewProps) {
             <CardDescription>Pacienți care necesită atenție imediată</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {highPriorityPatients.slice(0, 4).map((patient) => (
-              <div key={patient.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={`/placeholder-patient-${patient.id}.jpg`} />
-                    <AvatarFallback>
-                      {patient.firstName[0]}
-                      {patient.lastName[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">
-                      {patient.firstName} {patient.lastName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{patient.diagnosis}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={patient.riskLevel === "critical" ? "destructive" : "default"} className="text-xs">
-                        {patient.riskLevel === "critical" ? "Critic" : "Risc Înalt"}
-                      </Badge>
-                      {patient.activeAlerts > 0 && (
-                        <Badge variant="outline" className="text-xs">
-                          {patient.activeAlerts} alertă
+            {highPriorityPatients.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">
+                Nu există pacienți cu prioritate înaltă în acest moment.
+              </p>
+            ) : (
+              highPriorityPatients.slice(0, 4).map((patient) => (
+                <div key={patient.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={`/placeholder-patient-${patient.id}.jpg`} />
+                      <AvatarFallback>
+                        {patient.firstName[0]}
+                        {patient.lastName[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">
+                        {patient.firstName} {patient.lastName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{patient.diagnosis}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge
+                          variant={patient.riskLevel === "critical" ? "destructive" : "default"}
+                          className="text-xs"
+                        >
+                          {patient.riskLevel === "critical" ? "Critic" : "Risc Înalt"}
                         </Badge>
-                      )}
+                        {patient.activeAlerts > 0 && (
+                          <Badge variant="outline" className="text-xs">
+                            {patient.activeAlerts} alertă
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex flex-col gap-1">
+                    <Button variant="outline" size="sm">
+                      <Phone className="h-3 w-3 mr-1" />
+                      Contactează
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => onSelectPatient(patient.id)}>
+                      Vezi Profil
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <Button variant="outline" size="sm">
-                    <Phone className="h-3 w-3 mr-1" />
-                    Contactează
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => onSelectPatient(patient.id)}>
-                    Vezi Profil
-                  </Button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
             <Button variant="outline" className="w-full">
               Vezi Toți Pacienții Prioritari
             </Button>
