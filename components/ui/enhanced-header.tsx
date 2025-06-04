@@ -43,7 +43,9 @@ export function EnhancedHeader({ onMenuToggle, isMenuOpen }: HeaderProps) {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg font-semibold text-foreground">OncoLink</h1>
-              <p className="text-xs text-muted-foreground">{roleConfig.displayName}</p>
+              <p className="text-xs text-muted-foreground">
+                {currentRole === "navigator" ? "Navigator Dashboard" : roleConfig.displayName}
+              </p>
             </div>
           </div>
         </div>
@@ -53,7 +55,9 @@ export function EnhancedHeader({ onMenuToggle, isMenuOpen }: HeaderProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Caută pacienți, documente..."
+              placeholder={
+                currentRole === "navigator" ? "Caută pacienți, documente, mesaje..." : "Caută pacienți, documente..."
+              }
               className="pl-10 bg-muted/50 border-0 focus:bg-background transition-colors duration-200"
               onFocus={() => setSearchOpen(true)}
               onBlur={() => setSearchOpen(false)}
@@ -96,7 +100,7 @@ export function EnhancedHeader({ onMenuToggle, isMenuOpen }: HeaderProps) {
                     {currentRole === "patient"
                       ? "Maria Popescu"
                       : currentRole === "navigator"
-                        ? "Dr. Ana Ionescu"
+                        ? "Dr. Ana Ionescu - Navigator"
                         : "Admin User"}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">{roleConfig.displayName}</p>

@@ -1,19 +1,160 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import type { Navigator, PatientAlert, NavigatorTask, PatientSummary, PerformanceMetrics } from "@/types/navigator"
 
-// Mock data pentru navigator
+// Self-contained mock data to avoid import issues
+const mockPatientSummaries: PatientSummary[] = [
+  {
+    id: "1",
+    firstName: "Maria",
+    lastName: "Popescu",
+    age: 45,
+    diagnosis: "Limfom Non-Hodgkin",
+    stage: "III",
+    riskLevel: "high",
+    lastContact: "2024-11-11 14:30",
+    nextAppointment: "2024-11-12 10:00",
+    adherenceScore: 85,
+    recentSymptoms: 3,
+    unreadMessages: 2,
+    activeAlerts: 1,
+    treatmentPhase: "Chimioterapie Activă",
+    navigator: "Ana Ionescu",
+    primaryPhysician: "Dr. Emily Carter",
+    emergencyContact: {
+      name: "Ion Popescu",
+      phone: "+40 123 456 790",
+      relationship: "Soț",
+    },
+  },
+  {
+    id: "2",
+    firstName: "Ion",
+    lastName: "Georgescu",
+    age: 58,
+    diagnosis: "Cancer de Prostată",
+    stage: "II",
+    riskLevel: "medium",
+    lastContact: "2024-11-10 16:45",
+    nextAppointment: "2024-11-13 14:00",
+    adherenceScore: 92,
+    recentSymptoms: 1,
+    unreadMessages: 0,
+    activeAlerts: 0,
+    treatmentPhase: "Radioterapie",
+    navigator: "Ana Ionescu",
+    primaryPhysician: "Dr. Sarah Johnson",
+    emergencyContact: {
+      name: "Elena Georgescu",
+      phone: "+40 123 456 791",
+      relationship: "Soție",
+    },
+  },
+]
+
+const mockPatientAlerts: PatientAlert[] = [
+  {
+    id: "alert-001",
+    patientId: "1",
+    patientName: "Maria Popescu",
+    type: "critical",
+    category: "medical",
+    title: "Valori anormale analize sânge",
+    description: "Scăderea numărului de leucocite sub valorile normale.",
+    timestamp: "2024-11-11 09:30",
+    isRead: false,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 1,
+  },
+]
+
+const mockNavigatorTasks: NavigatorTask[] = [
+  {
+    id: "task-001",
+    title: "Follow-up post chimioterapie",
+    description: "Contactează pacientul pentru evaluarea efectelor secundare",
+    patientId: "1",
+    patientName: "Maria Popescu",
+    priority: "high",
+    category: "follow-up",
+    dueDate: "2024-11-11 16:00",
+    estimatedDuration: 30,
+    status: "pending",
+    assignedBy: "Dr. Emily Carter",
+  },
+  {
+    id: "task-002",
+    title: "Programare control",
+    description: "Programează consultația de control pentru săptămâna viitoare",
+    patientId: "2",
+    patientName: "Ion Georgescu",
+    priority: "medium",
+    category: "scheduling",
+    dueDate: "2024-11-12 10:00",
+    estimatedDuration: 15,
+    status: "in-progress",
+    assignedBy: "Dr. Sarah Johnson",
+  },
+  {
+    id: "task-003",
+    title: "Actualizare plan tratament",
+    description: "Revizuiește și actualizează planul de tratament",
+    patientId: "3",
+    patientName: "Ana Dumitrescu",
+    priority: "high",
+    category: "treatment",
+    dueDate: "2024-11-10 14:00",
+    estimatedDuration: 45,
+    status: "overdue",
+    assignedBy: "Dr. Emily Carter",
+  },
+]
+
+// Adaugă și mai multe alerte mock
+const additionalMockAlerts: PatientAlert[] = [
+  {
+    id: "alert-002",
+    patientId: "2",
+    patientName: "Ion Georgescu",
+    type: "warning",
+    category: "medication",
+    title: "Aderență medicație scăzută",
+    description: "Pacientul a ratat 2 doze consecutive în ultimele 3 zile.",
+    timestamp: "2024-11-10 14:20",
+    isRead: false,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 1,
+  },
+  {
+    id: "alert-003",
+    patientId: "3",
+    patientName: "Ana Dumitrescu",
+    type: "info",
+    category: "appointment",
+    title: "Programare confirmată",
+    description: "Pacientul a confirmat programarea pentru mâine la 10:00.",
+    timestamp: "2024-11-10 16:45",
+    isRead: true,
+    isResolved: false,
+    assignedTo: "nav-001",
+    escalationLevel: 0,
+  },
+]
+
+// Mock Navigator Data
 const mockNavigator: Navigator = {
   id: "nav-001",
   firstName: "Ana",
-  lastName: "Popescu",
-  email: "ana.popescu@hospital.ro",
-  phone: "+40 721 234 567",
+  lastName: "Ionescu",
+  email: "ana.ionescu@oncalink.ro",
+  phone: "+40 123 456 789",
   specialization: "Oncologie",
-  department: "Oncologie Medicală",
-  experience: 8,
-  certification: ["Navigator Medical Certificat", "Oncologie Clinică", "Comunicare Terapeutică"],
+  department: "Navigare Pacienți Oncologici",
+  experience: 5,
+  certification: ["Certified Patient Navigator", "Oncology Care Specialist"],
   activePatients: 24,
   maxCapacity: 30,
   workSchedule: {
@@ -25,337 +166,71 @@ const mockNavigator: Navigator = {
   },
 }
 
-// Mock data pentru alerte
-const mockAlerts: PatientAlert[] = [
-  {
-    id: "alert-001",
-    patientId: "patient-001",
-    patientName: "Maria Popescu",
-    type: "critical",
-    category: "medical",
-    title: "Valori anormale analize sânge",
-    description: "Scăderea numărului de leucocite sub valorile normale. Necesită evaluare medicală urgentă.",
-    timestamp: "2024-01-11T09:00:00Z",
-    isRead: false,
-    isResolved: false,
-    assignedTo: "nav-001",
-    escalationLevel: 2,
-    relatedData: {
-      labResults: {
-        leucocite: { value: 2.8, normal: "4.0-11.0", unit: "x10³/μL" },
-        hemoglobina: { value: 9.2, normal: "12.0-16.0", unit: "g/dL" },
-      },
-    },
-  },
-  {
-    id: "alert-002",
-    patientId: "patient-002",
-    patientName: "Ion Georgescu",
-    type: "high",
-    category: "appointment",
-    title: "Programare ratată",
-    description: "Pacientul nu s-a prezentat la consultația programată pentru azi.",
-    timestamp: "2024-01-11T10:30:00Z",
-    isRead: false,
-    isResolved: false,
-    assignedTo: "nav-001",
-    escalationLevel: 1,
-    relatedData: {
-      appointment: {
-        scheduledTime: "2024-01-11T10:00:00Z",
-        doctor: "Dr. Emily Carter",
-        type: "Consultație oncologie",
-      },
-    },
-  },
-  {
-    id: "alert-003",
-    patientId: "patient-003",
-    patientName: "Elena Ionescu",
-    type: "medium",
-    category: "medication",
-    title: "Aderență scăzută la medicație",
-    description: "Pacientul a raportat că a uitat să ia medicația de 3 ori în ultima săptămână.",
-    timestamp: "2024-01-11T08:15:00Z",
-    isRead: true,
-    isResolved: false,
-    assignedTo: "nav-001",
-    escalationLevel: 0,
-    relatedData: {
-      medication: {
-        name: "Tamoxifen",
-        missedDoses: 3,
-        adherenceRate: 78,
-      },
-    },
-  },
-  {
-    id: "alert-004",
-    patientId: "patient-004",
-    patientName: "Gheorghe Ionescu",
-    type: "low",
-    category: "communication",
-    title: "Mesaj nerezolvat",
-    description: "Pacientul a trimis întrebări despre efectele secundare acum 2 zile.",
-    timestamp: "2024-01-09T14:20:00Z",
-    isRead: true,
-    isResolved: false,
-    assignedTo: "nav-001",
-    escalationLevel: 0,
-    relatedData: {
-      message: {
-        subject: "Întrebări despre efecte secundare",
-        content: "Am observat că îmi cade părul mai mult decât de obicei...",
-      },
-    },
-  },
-]
-
-// Mock data pentru pacienți
-const mockPatients: PatientSummary[] = [
-  {
-    id: "patient-001",
-    firstName: "Maria",
-    lastName: "Popescu",
-    age: 58,
-    diagnosis: "Cancer de sân",
-    stage: "Stadiul II",
-    riskLevel: "critical",
-    lastContact: "2024-01-10",
-    nextAppointment: "2024-01-15 10:00",
-    adherenceScore: 85,
-    recentSymptoms: 3,
-    unreadMessages: 2,
-    activeAlerts: 1,
-    treatmentPhase: "Chimioterapie",
-    navigator: "Ana Popescu",
-    primaryPhysician: "Dr. Emily Carter",
-    emergencyContact: {
-      name: "Gheorghe Popescu",
-      phone: "+40 721 345 678",
-      relationship: "Soț",
-    },
-  },
-  {
-    id: "patient-002",
-    firstName: "Ion",
-    lastName: "Georgescu",
-    age: 65,
-    diagnosis: "Cancer pulmonar",
-    stage: "Stadiul III",
-    riskLevel: "high",
-    lastContact: "2024-01-09",
-    nextAppointment: "2024-01-12 14:30",
-    adherenceScore: 92,
-    recentSymptoms: 1,
-    unreadMessages: 0,
-    activeAlerts: 1,
-    treatmentPhase: "Radioterapie",
-    navigator: "Ana Popescu",
-    primaryPhysician: "Dr. Michael Johnson",
-    emergencyContact: {
-      name: "Ana Georgescu",
-      phone: "+40 721 456 789",
-      relationship: "Soție",
-    },
-  },
-  {
-    id: "patient-003",
-    firstName: "Elena",
-    lastName: "Ionescu",
-    age: 42,
-    diagnosis: "Cancer ovarian",
-    stage: "Stadiul I",
-    riskLevel: "medium",
-    lastContact: "2024-01-11",
-    nextAppointment: "2024-01-18 09:00",
-    adherenceScore: 78,
-    recentSymptoms: 2,
-    unreadMessages: 1,
-    activeAlerts: 1,
-    treatmentPhase: "Post-chirurgie",
-    navigator: "Ana Popescu",
-    primaryPhysician: "Dr. Sarah Wilson",
-    emergencyContact: {
-      name: "Mihai Ionescu",
-      phone: "+40 721 567 890",
-      relationship: "Soț",
-    },
-  },
-]
-
-// Mock data pentru sarcini
-const mockTasks: NavigatorTask[] = [
-  {
-    id: "task-001",
-    title: "Follow-up post chimioterapie",
-    description: "Verificare stare generală și efecte secundare după ultima ședință de chimioterapie",
-    patientId: "patient-001",
-    patientName: "Maria Popescu",
-    priority: "urgent",
-    category: "follow-up",
-    dueDate: "2024-01-11T16:00:00Z",
-    estimatedDuration: 30,
-    status: "overdue",
-    assignedBy: "Dr. Emily Carter",
-  },
-  {
-    id: "task-002",
-    title: "Coordonare programare nutriționist",
-    description: "Programare consultație nutriționist pentru plan alimentar personalizat",
-    patientId: "patient-002",
-    patientName: "Ion Georgescu",
-    priority: "high",
-    category: "coordination",
-    dueDate: "2024-01-12T10:00:00Z",
-    estimatedDuration: 15,
-    status: "pending",
-    assignedBy: "Dr. Michael Johnson",
-  },
-]
-
-// Mock data pentru metrici de performanță
 const mockPerformanceMetrics: PerformanceMetrics = {
-  period: "Ianuarie 2024",
+  period: "Noiembrie 2024",
   patientsManaged: 24,
-  averageResponseTime: 2.5,
+  averageResponseTime: 2.3,
   patientSatisfactionScore: 4.7,
   adherenceImprovementRate: 15,
   criticalAlertsResolved: 8,
-  appointmentsCoordinated: 45,
+  appointmentsCoordinated: 156,
   educationalSessionsConducted: 12,
-  escalationsToPhysicians: 3,
-  completedTasks: 28,
+  escalationsToPhysicians: 5,
+  completedTasks: 89,
   overdueTasksRate: 8,
 }
 
 export function useNavigatorData() {
-  const [alerts, setAlerts] = useState<PatientAlert[]>(mockAlerts)
-  const [patients] = useState<PatientSummary[]>(mockPatients)
-  const [tasks] = useState<NavigatorTask[]>(mockTasks)
+  const [navigator] = useState<Navigator>(mockNavigator)
+  const [patients] = useState<PatientSummary[]>(mockPatientSummaries)
+  const [alerts, setAlerts] = useState<PatientAlert[]>([...mockPatientAlerts, ...additionalMockAlerts])
+  const [tasks, setTasks] = useState<NavigatorTask[]>(mockNavigatorTasks)
+  const [performanceMetrics] = useState<PerformanceMetrics>(mockPerformanceMetrics)
 
   // Funcții pentru gestionarea alertelor
   const markAlertAsRead = (alertId: string) => {
     setAlerts((prev) => prev.map((alert) => (alert.id === alertId ? { ...alert, isRead: true } : alert)))
   }
 
-  const resolveAlert = (alertId: string, resolutionNote: string) => {
+  const resolveAlert = (alertId: string) => {
+    setAlerts((prev) => prev.map((alert) => (alert.id === alertId ? { ...alert, isResolved: true } : alert)))
+  }
+
+  const escalateAlert = (alertId: string) => {
     setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              isResolved: true,
-              resolutionNote,
-              resolvedAt: new Date().toISOString(),
-              resolvedBy: mockNavigator.id,
-            }
-          : alert,
-      ),
+      prev.map((alert) => (alert.id === alertId ? { ...alert, escalationLevel: alert.escalationLevel + 1 } : alert)),
     )
   }
 
-  const escalateAlert = (alertId: string, reason?: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              escalationLevel: alert.escalationLevel + 1,
-              escalatedAt: new Date().toISOString(),
-              escalationReason: reason,
-            }
-          : alert,
-      ),
-    )
+  // Funcții pentru gestionarea task-urilor
+  const updateTaskStatus = (taskId: string, status: NavigatorTask["status"]) => {
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, status } : task)))
   }
 
-  const deleteAlert = (alertId: string) => {
-    setAlerts((prev) => prev.filter((alert) => alert.id !== alertId))
-  }
-
-  const markAllAlertsAsRead = () => {
-    setAlerts((prev) => prev.map((alert) => ({ ...alert, isRead: true })))
-  }
-
-  const bulkResolveAlerts = (alertIds: string[], resolutionNote: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alertIds.includes(alert.id)
-          ? {
-              ...alert,
-              isResolved: true,
-              resolutionNote,
-              resolvedAt: new Date().toISOString(),
-              resolvedBy: mockNavigator.id,
-            }
-          : alert,
-      ),
-    )
-  }
-
-  // Funcții pentru comunicare
-  const initiatePhoneCall = (patientId: string) => {
-    const patient = patients.find((p) => p.id === patientId)
-    if (patient) {
-      // Simulare apel telefonic
-      console.log(`Initiating phone call to ${patient.firstName} ${patient.lastName}`)
-      console.log(`Phone: ${patient.emergencyContact.phone}`)
-
-      // În implementarea reală, aici ar fi integrarea cu sistemul de telefonie
-      // De exemplu: window.open(`tel:${patient.emergencyContact.phone}`)
-
-      return {
-        success: true,
-        message: `Apel inițiat către ${patient.firstName} ${patient.lastName}`,
-        phone: patient.emergencyContact.phone,
-      }
-    }
-    return {
-      success: false,
-      message: "Pacientul nu a fost găsit",
-    }
-  }
-
-  const sendMessage = (patientId: string, message?: string) => {
-    const patient = patients.find((p) => p.id === patientId)
-    if (patient) {
-      // Simulare trimitere mesaj
-      console.log(`Sending message to ${patient.firstName} ${patient.lastName}`)
-      console.log(`Message: ${message || "Mesaj standard de follow-up"}`)
-
-      // În implementarea reală, aici ar fi integrarea cu sistemul de mesagerie
-      // De exemplu: API call către sistemul de SMS/email
-
-      return {
-        success: true,
-        message: `Mesaj trimis către ${patient.firstName} ${patient.lastName}`,
-        sentAt: new Date().toISOString(),
-      }
-    }
-    return {
-      success: false,
-      message: "Pacientul nu a fost găsit",
-    }
-  }
-
+  // Funcție pentru obținerea detaliilor pacientului
   const getPatientDetail = (patientId: string) => {
-    return patients.find((p) => p.id === patientId)
+    const patient = patients.find((p) => p.id === patientId)
+    if (!patient) return null
+
+    return {
+      ...patient,
+      timeline: [],
+      labResults: [],
+      treatmentData: null,
+      documents: [],
+      symptoms: [],
+      tasks: [],
+      messages: [],
+    }
   }
 
-  // Calculări derivate
-  const unreadAlerts = useMemo(() => alerts.filter((alert) => !alert.isRead), [alerts])
-  const unresolvedAlerts = useMemo(() => alerts.filter((alert) => !alert.isResolved), [alerts])
-  const criticalPatients = useMemo(() => patients.filter((p) => p.riskLevel === "critical"), [patients])
-  const highPriorityPatients = useMemo(
-    () => patients.filter((p) => p.riskLevel === "high" || p.riskLevel === "critical"),
-    [patients],
-  )
-  const overdueTasks = useMemo(() => tasks.filter((task) => task.status === "overdue"), [tasks])
-  const todayAppointments = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0]
-    return patients.filter((p) => p.nextAppointment?.startsWith(today))
-  }, [patients])
+  // Computed values
+  const criticalPatients = patients.filter((p) => p.riskLevel === "critical")
+  const highPriorityPatients = patients.filter((p) => p.riskLevel === "high" || p.riskLevel === "critical")
+  const unreadAlerts = alerts.filter((a) => !a.isRead)
+  const unresolvedAlerts = alerts.filter((a) => !a.isResolved)
+  const overdueTasks = tasks.filter((t) => t.status === "overdue")
+  const todayAppointments = patients.filter((p) => p.nextAppointment && p.nextAppointment.startsWith("2024-11-11"))
 
   // Statistici pentru dashboard
   const stats = {
@@ -368,26 +243,24 @@ export function useNavigatorData() {
   }
 
   return {
-    navigator: mockNavigator,
-    alerts,
+    navigator,
     patients,
+    alerts,
     tasks,
-    performanceMetrics: mockPerformanceMetrics,
+    performanceMetrics,
     stats,
-    unreadAlerts,
-    unresolvedAlerts,
-    criticalPatients,
-    highPriorityPatients,
-    overdueTasks,
-    todayAppointments,
+    // Funcții
     markAlertAsRead,
     resolveAlert,
+    updateTaskStatus,
     escalateAlert,
-    deleteAlert,
-    markAllAlertsAsRead,
-    bulkResolveAlerts,
-    initiatePhoneCall,
-    sendMessage,
     getPatientDetail,
+    // Computed values
+    criticalPatients,
+    highPriorityPatients,
+    unreadAlerts,
+    unresolvedAlerts,
+    overdueTasks,
+    todayAppointments,
   }
 }

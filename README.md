@@ -4,14 +4,6 @@
 
 A comprehensive medical dashboard designed for oncology patient management, featuring role-based interfaces for Patients, Navigators, and Administrators. Built with Next.js 14+, React, TypeScript, Tailwind CSS, and shadcn/ui components.
 
-## ⚠️ Reguli pentru lucrul în V0.dev
-
-- Nu modificați componente globale (`layout.tsx`, `app/globals.css`, etc.) fără aprobare.
-- Lucrați strict în scope-ul paginii sau al componentei (ex: `/patients/`, `/patients/[id]/`).
-- Pentru orice modificare ce afectează meniul global, headerul sau structura generală, creați un ticket separat pentru review de echipă.
-- Toate componentele custom pentru secțiuni locale se găsesc în `components/patients/`.
-- Pentru reguli complete, consultați [rules.md](./rules.md).
-
 ## 🏗️ Architecture
 
 ### Project Structure
@@ -22,12 +14,9 @@ medical-dashboard/
 │   ├── (dashboard)/              # Dashboard layouts
 │   ├── (main)/                   # Main application routes
 │   │   ├── navigator/            # Navigator-specific pages
-│   │   │   ├── patients/         # Patient management
-│   │   │   │   ├── [id]/         # Dynamic patient routes
-│   │   │   │   │   └── details/  # Patient details page
-│   │   │   │   └── onboarding/   # Patient onboarding flow
-│   │   │   ├── alerts/           # Alerts management
-│   │   │   └── appointments/     # Appointments management
+│   │   │   └── patients/         # Patient management
+│   │   │       └── [id]/         # Dynamic patient routes
+│   │   │           └── details/  # Patient details page
 │   │   ├── patient/              # Patient-specific pages
 │   │   └── admin/                # Admin-specific pages
 │   └── (public)/                 # Public pages
@@ -35,31 +24,14 @@ medical-dashboard/
 │   ├── ui/                       # Base UI components
 │   ├── medical/                  # Medical-specific components
 │   ├── navigator/                # Navigator components
-│   │   ├── alerts-management.tsx # Complete alerts system
-│   │   ├── patient-management.tsx # Patient list & management
-│   │   ├── patient-card.tsx      # Individual patient cards
-│   │   ├── patient-onboarding-dialog.tsx # Onboarding wizard
-│   │   └── alert-action-dialog.tsx # Alert action interface
 │   ├── patient/                  # Patient components
 │   └── patient-details/          # Patient details cards
 ├── hooks/                        # Custom React hooks
-│   ├── useNavigatorData.ts       # Navigator dashboard data
-│   ├── usePatientList.ts         # Patient list management
-│   ├── usePatientOnboarding.ts   # Onboarding workflow
-│   ├── useAlertFilters.ts        # Alert filtering system
-│   └── useAlertsForPatient.ts    # Patient-specific alerts
 ├── types/                        # TypeScript type definitions
 └── data/                         # Mock data and constants
 \`\`\`
 
 ## 🎯 Key Features
-
-### Navigator Dashboard
-1. **Patient Management** - Complete patient list with filtering and search
-2. **Alerts System** - Critical alerts management with action workflows
-3. **Patient Onboarding** - Multi-step wizard for new patient registration
-4. **Communication Tools** - Phone calls, messaging, and notifications
-5. **Performance Metrics** - Dashboard overview with key indicators
 
 ### Patient Details Dashboard (19 Cards)
 1. **Patient Overview** - Basic patient information and status
@@ -82,59 +54,26 @@ medical-dashboard/
 18. **Calendar** - Integrated appointment calendar
 19. **AI Protocol** - AI-driven treatment recommendations
 
-### Alerts Management System
-- **Real-time alerts** with priority-based filtering
-- **Action workflows** for alert resolution
-- **Bulk operations** for efficient management
-- **Patient-specific alerts** with contextual actions
-- **Communication integration** (phone, messaging)
-
-### Patient Onboarding System
-- **Multi-step wizard** with progress tracking
-- **Form validation** with real-time feedback
-- **Personal information** collection
-- **Medical history** and treatment preferences
-- **Emergency contacts** and communication settings
-
 ## 🔧 Technical Implementation
 
 ### Custom Hooks Architecture
 
-Each major feature uses dedicated hooks for data management:
+Each card component uses dedicated hooks for data management:
 
 \`\`\`typescript
-// Navigator Data Hook
-export function useNavigatorData() {
-  return {
-    alerts: Alert[],
-    patients: Patient[],
-    metrics: DashboardMetrics,
-    handleAlertAction: (alertId: string, action: string) => void,
-    initiatePhoneCall: (patientId: string) => Promise<ActionResult>,
-    sendMessage: (patientId: string, message: string) => Promise<ActionResult>
-  }
+// Example hook structure
+export interface PatientData {
+  // Type definitions
 }
 
-// Patient Onboarding Hook
-export function usePatientOnboarding() {
-  return {
-    currentStep: number,
-    formData: OnboardingFormData,
-    errors: ValidationErrors,
-    nextStep: () => void,
-    previousStep: () => void,
-    updateFormData: (data: Partial<OnboardingFormData>) => void,
-    submitOnboarding: () => Promise<void>
-  }
+export function useMockPatientData(patientId: string): PatientData {
+  return useMemo(() => ({
+    // Mock data implementation
+  }), [patientId])
 }
 \`\`\`
 
 ### Available Hooks
-- `useNavigatorData` - Navigator dashboard data and actions
-- `usePatientList` - Patient list management and filtering
-- `usePatientOnboarding` - Multi-step onboarding workflow
-- `useAlertFilters` - Advanced alert filtering and sorting
-- `useAlertsForPatient` - Patient-specific alert management
 - `useMockPatient` - Core patient data
 - `useMockCompliance` - Compliance and AI checklist
 - `useMockAdherence` - Treatment adherence metrics
@@ -181,7 +120,6 @@ export function PatientCard({ patientId }: CardProps) {
 - **Typography**: Clear, readable fonts optimized for medical data
 - **Icons**: Lucide React icons for consistency
 - **Layout**: Responsive grid system with mobile-first approach
-- **Animations**: Smooth transitions and loading states
 
 ### Status Indicators
 - 🟢 **Green**: Normal/Completed/Positive
@@ -195,12 +133,6 @@ export function PatientCard({ patientId }: CardProps) {
 - **Information Cards**: Patient Overview, Medical History
 - **Interactive Cards**: Calendar, Objectives, Education
 
-### Alert Priority System
-- **Critical**: Red background badges (`bg-red-100 text-red-800`)
-- **High Priority**: Orange background badges (`bg-orange-100 text-orange-800`)
-- **Medium Priority**: Blue background badges (`bg-blue-100 text-blue-800`)
-- **Low Priority**: Gray background badges (`bg-gray-100 text-gray-800`)
-
 ## 📊 Data Management
 
 ### Mock Data Structure
@@ -211,15 +143,12 @@ Each hook provides realistic medical data including:
 - Appointment and consultation history
 - Educational progress and resources
 - AI-generated insights and recommendations
-- Alert management with priority levels
-- Communication logs and preferences
 
 ### Type Safety
 Full TypeScript implementation with:
 - Strict type checking for all data structures
 - Interface definitions for all components
 - Proper error handling and validation
-- Zod schemas for form validation
 
 ## 🚀 Getting Started
 
@@ -247,15 +176,6 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 🔄 Navigation Flow
 
-### Navigator Workflow
-\`\`\`
-Navigator Dashboard → 
-├── Patients Tab → Patient Management → Onboarding/Patient Details
-├── Alerts Tab → Alert Management → Action Dialogs
-├── Appointments Tab → Appointment Scheduling
-└── Overview Tab → Dashboard Metrics
-\`\`\`
-
 ### Patient Details Access
 \`\`\`
 Navigator Dashboard → Patients List → Select Patient → Patient Details
@@ -263,12 +183,9 @@ Navigator Dashboard → Patients List → Select Patient → Patient Details
 
 ### Route Structure
 \`\`\`
-/navigator-dashboard              # Main navigator dashboard
-/navigator/patients               # Patients list
-/navigator/patients/onboarding    # Patient onboarding flow
-/navigator/patients/[id]          # Patient overview
+/navigator/patients           # Patients list
+/navigator/patients/[id]      # Patient overview
 /navigator/patients/[id]/details  # Detailed patient view (19 cards)
-/navigator/alerts                 # Alerts management
 \`\`\`
 
 ## 📱 Responsive Design
@@ -283,7 +200,6 @@ Navigator Dashboard → Patients List → Select Patient → Patient Details
 - Collapsible card sections
 - Optimized data display for small screens
 - Swipe gestures for card navigation
-- Sticky filters and navigation
 
 ## 🔐 Security & Privacy
 
@@ -327,7 +243,6 @@ describe('useMockPatient', () => {
 - Lazy loading for card components
 - Virtual scrolling for large lists
 - Image optimization with Next.js
-- Smooth animations with CSS transitions
 
 ### Monitoring
 - Performance metrics tracking
@@ -343,15 +258,12 @@ describe('useMockPatient', () => {
 - [ ] Telemedicine integration
 - [ ] Multi-language support
 - [ ] Advanced reporting system
-- [ ] Voice commands for accessibility
-- [ ] Offline mode support
 
 ### API Integration
 - [ ] Replace mock hooks with real API calls
 - [ ] Implement caching strategies
 - [ ] Add offline support
 - [ ] Real-time notifications
-- [ ] Integration with hospital systems
 
 ## 🤝 Contributing
 
@@ -361,7 +273,6 @@ describe('useMockPatient', () => {
 3. Implement proper error handling
 4. Write comprehensive tests
 5. Follow accessibility guidelines
-6. Maintain consistent code style
 
 ### Code Style
 - ESLint configuration for consistency
@@ -409,21 +320,6 @@ For technical support or questions:
 ---
 
 **Built with ❤️ for better patient care**
+\`\`\`
 
-## 📝 Recent Updates
-
-### Latest Features (v1.2.0)
-- ✅ Complete Navigator Dashboard implementation
-- ✅ Advanced Alerts Management System
-- ✅ Patient Onboarding Workflow
-- ✅ Enhanced Patient Management
-- ✅ Communication Tools Integration
-- ✅ Dark Mode Support
-- ✅ Responsive Design Improvements
-- ✅ Performance Optimizations
-
-### Bug Fixes
-- Fixed empty object errors in navigator hooks
-- Improved form validation in onboarding
-- Enhanced error handling across components
-- Optimized loading states and transitions
+This comprehensive markdown documentation covers all aspects of the medical dashboard project, from architecture and implementation details to usage guidelines and future enhancements. It serves as both a technical reference and user guide for the system.

@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Filter, UserPlus, Eye, MessageSquare } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { PatientOnboardingDialog } from "@/components/navigator/patient-onboarding-dialog"
 
 export default function PatientsListPage() {
   const router = useRouter()
+  const [showOnboarding, setShowOnboarding] = useState(false)
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -17,7 +20,7 @@ export default function PatientsListPage() {
           <h1 className="text-3xl font-bold">Lista Pacienți</h1>
           <p className="text-muted-foreground">Gestionează și monitorizează pacienții din grija ta</p>
         </div>
-        <Button>
+        <Button onClick={() => setShowOnboarding(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
           Adaugă Pacient
         </Button>
@@ -150,6 +153,14 @@ export default function PatientsListPage() {
           </div>
         </CardContent>
       </Card>
+      <PatientOnboardingDialog
+        open={showOnboarding}
+        onOpenChange={setShowOnboarding}
+        onPatientAdded={(patient) => {
+          // Refresh the patients list or add to local state
+          console.log("New patient added:", patient)
+        }}
+      />
     </div>
   )
 }

@@ -1,261 +1,190 @@
 "use client"
 
 import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PageTransition } from "@/components/ui/page-transition"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { NavigatorOverview } from "./navigator-overview"
 import { AlertsManagement } from "./alerts-management"
 import { PatientManagement } from "./patient-management"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
-import { AdvancedAppointmentScheduler } from "@/components/appointments/advanced-appointment-scheduler"
-import { AppointmentManagement } from "@/components/appointments/appointment-management"
-import { AppointmentCalendarView } from "@/components/appointments/appointment-calendar-view"
+import { PatientDetailView } from "./patient-detail-view"
+import { CalendarAppointmentsView } from "./calendar-appointments-view"
+import { PatientNotesManager } from "./patient-notes-manager"
+import { EnhancedSymptomsTracker } from "./enhanced-symptoms-tracker"
+import { Users, AlertTriangle, Calendar, FileText, Activity, Settings, MessageSquare, Phone } from "lucide-react"
 
 export function NavigatorDashboard() {
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
-  const router = useRouter()
-  const { toast } = useToast()
 
   const handleSelectPatient = (patientId: string) => {
-    router.push(`/navigator/patients/${patientId}`)
-    toast({
-      title: "Pacient selectat",
-      description: `Navigare către profilul pacientului #${patientId}`,
-    })
+    setSelectedPatientId(patientId)
+    setActiveTab("patient-details")
+  }
+
+  const handleBackToOverview = () => {
+    setSelectedPatientId(null)
+    setActiveTab("overview")
+  }
+
+  if (selectedPatientId && activeTab === "patient-details") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={handleBackToOverview}>
+            ← Înapoi la Dashboard
+          </Button>
+          <h1 className="text-2xl font-bold">Detalii Pacient</h1>
+        </div>
+        <PatientDetailView patientId={selectedPatientId} onBack={handleBackToOverview} />
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard Navigator</h1>
-        <p className="text-muted-foreground">
-          Gestionează pacienții, alertele și programările din rolul tău de navigator oncologic.
-        </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-blue-600">Dashboard Navigator</h1>
+          <p className="text-muted-foreground">Gestionează pacienții și coordonează îngrijirea medicală</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Phone className="mr-2 h-4 w-4" />
+            Urgențe
+          </Button>
+          <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Mesaje
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="sticky top-0 z-10 bg-background pt-2 pb-4">
-          <TabsList className="w-full bg-white dark:bg-gray-900 border">
-            <TabsTrigger value="overview" className="flex-1">
-              Prezentare Generală
-            </TabsTrigger>
-            <TabsTrigger value="patients" className="flex-1">
-              Pacienți
-            </TabsTrigger>
-            <TabsTrigger value="alerts" className="flex-1">
-              Alerte
-            </TabsTrigger>
-            <TabsTrigger value="appointments" className="flex-1">
-              Programări
-            </TabsTrigger>
-            <TabsTrigger value="communication" className="flex-1">
-              Comunicare
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-1">
-              Analize
-            </TabsTrigger>
-            <TabsTrigger value="training" className="flex-1">
-              Training
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Prezentare
+          </TabsTrigger>
+          <TabsTrigger value="patients" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Pacienți
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Alerte
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
+          <TabsTrigger value="notes" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Note
+          </TabsTrigger>
+          <TabsTrigger value="symptoms" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Simptome
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Setări
+          </TabsTrigger>
+        </TabsList>
 
-        <TabsContent value="overview" className="mt-0">
-          <PageTransition>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pacienți Activi</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">24</div>
-                  <p className="text-xs text-muted-foreground">+2 față de luna trecută</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Alerte Nerezolvate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">12</div>
-                  <p className="text-xs text-muted-foreground">+2 în ultimele 24h</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Programări Astăzi</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">7</div>
-                  <p className="text-xs text-muted-foreground">3 în următoarele 2 ore</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Aderență Medie</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">86%</div>
-                  <p className="text-xs text-muted-foreground">+2% față de luna trecută</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
-              <Card className="col-span-4 bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Activitate Recentă</CardTitle>
-                  <CardDescription>Ultimele 10 interacțiuni cu pacienții</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Placeholder pentru activitate recentă */}
-                  <div className="space-y-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-4 border-b pb-4">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700" />
-                        <div className="space-y-1">
-                          <p className="font-medium">Interacțiune cu pacientul</p>
-                          <p className="text-sm text-gray-500">Acum {i + 1} ore</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="col-span-3 bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Alerte Critice</CardTitle>
-                  <CardDescription>Alerte care necesită atenție imediată</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Placeholder pentru alerte critice */}
-                  <div className="space-y-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-                      >
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium text-red-800 dark:text-red-300">Alertă critică #{i + 1}</p>
-                          <span className="text-xs text-red-700 dark:text-red-400">Acum {i * 2 + 1}h</span>
-                        </div>
-                        <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                          Descriere alertă critică care necesită atenție imediată
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </PageTransition>
+        <TabsContent value="overview" className="space-y-4">
+          <NavigatorOverview onSelectPatient={handleSelectPatient} />
         </TabsContent>
 
-        <TabsContent value="patients" className="mt-0">
-          <PageTransition>
-            <PatientManagement onSelectPatient={handleSelectPatient} />
-          </PageTransition>
+        <TabsContent value="patients" className="space-y-4">
+          <PatientManagement onSelectPatient={handleSelectPatient} />
         </TabsContent>
 
-        <TabsContent value="alerts" className="mt-0">
-          <PageTransition>
-            <AlertsManagement />
-          </PageTransition>
+        <TabsContent value="alerts" className="space-y-4">
+          <AlertsManagement onSelectPatient={handleSelectPatient} />
         </TabsContent>
 
-        <TabsContent value="appointments" className="mt-0">
-          <PageTransition>
-            <Card className="bg-white dark:bg-gray-900">
-              <CardHeader>
-                <CardTitle>Programări</CardTitle>
-                <CardDescription>Gestionează programările pacienților</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Programări Recente</h3>
-                  <AdvancedAppointmentScheduler />
-                </div>
+        <TabsContent value="calendar" className="space-y-4">
+          <CalendarAppointmentsView onSelectPatient={handleSelectPatient} />
+        </TabsContent>
 
-                <div className="grid gap-6 lg:grid-cols-7">
-                  <Card className="lg:col-span-3 bg-white dark:bg-gray-900">
+        <TabsContent value="notes" className="space-y-4">
+          <PatientNotesManager />
+        </TabsContent>
+
+        <TabsContent value="symptoms" className="space-y-4">
+          <EnhancedSymptomsTracker />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Setări Navigator</CardTitle>
+              <CardDescription>Configurează preferințele și setările pentru dashboard-ul navigator</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Programări Viitoare</CardTitle>
+                      <CardTitle className="text-lg">Notificări</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0">
-                      <AppointmentManagement showAllAppointments />
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Alerte critice</span>
+                        <Button variant="outline" size="sm">
+                          Activat
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Email zilnic</span>
+                        <Button variant="outline" size="sm">
+                          Activat
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">SMS urgențe</span>
+                        <Button variant="outline" size="sm">
+                          Activat
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="lg:col-span-4 bg-white dark:bg-gray-900">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Calendar Programări</CardTitle>
+                      <CardTitle className="text-lg">Preferințe</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0">
-                      <AppointmentCalendarView showFilters={false} />
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Mod întunecat</span>
+                        <Button variant="outline" size="sm">
+                          Dezactivat
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Actualizare automată</span>
+                        <Button variant="outline" size="sm">
+                          5 secunde
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Limba</span>
+                        <Button variant="outline" size="sm">
+                          Română
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
-              </CardContent>
-            </Card>
-          </PageTransition>
-        </TabsContent>
 
-        <TabsContent value="communication" className="mt-0">
-          <PageTransition>
-            <div className="grid gap-4">
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Comunicare</CardTitle>
-                  <CardDescription>Gestionează comunicarea cu pacienții</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Placeholder pentru comunicare */}
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">Funcționalitate în dezvoltare</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </PageTransition>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="mt-0">
-          <PageTransition>
-            <div className="grid gap-4">
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Analize</CardTitle>
-                  <CardDescription>Vizualizează analizele pacienților</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Placeholder pentru analize */}
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">Funcționalitate în dezvoltare</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </PageTransition>
-        </TabsContent>
-
-        <TabsContent value="training" className="mt-0">
-          <PageTransition>
-            <div className="grid gap-4">
-              <Card className="bg-white dark:bg-gray-900">
-                <CardHeader>
-                  <CardTitle>Training</CardTitle>
-                  <CardDescription>Accesează resurse de training</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Placeholder pentru training */}
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">Funcționalitate în dezvoltare</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </PageTransition>
+                <div className="flex gap-2 pt-4">
+                  <Button>Salvează Setările</Button>
+                  <Button variant="outline">Resetează</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
