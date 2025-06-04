@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Settings, Database, Shield, TrendingUp, AlertTriangle } from "lucide-react"
+import { Users, Settings, Database, Shield, TrendingUp, AlertTriangle, Activity } from "lucide-react"
+import Link from "next/link"
 
 export default function AdminDashboardPage() {
   return (
@@ -89,9 +90,23 @@ export default function AdminDashboardPage() {
             <CardDescription>Funcții de administrare rapidă</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-start">
-              <Users className="mr-2 h-4 w-4" />
-              Gestionează Utilizatori
+            <Button className="w-full justify-start" asChild>
+              <Link href="/admin/patients">
+                <Users className="mr-2 h-4 w-4" />
+                Gestionează Pacienți
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/admin/team">
+                <Activity className="mr-2 h-4 w-4" />
+                Echipa Medicală
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/admin/alerts">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                Alerte Sistem
+              </Link>
             </Button>
             <Button variant="outline" className="w-full justify-start">
               <Settings className="mr-2 h-4 w-4" />
@@ -99,7 +114,7 @@ export default function AdminDashboardPage() {
             </Button>
             <Button variant="outline" className="w-full justify-start">
               <Database className="mr-2 h-4 w-4" />
-              Backup & Restore
+              Backup Manual
             </Button>
             <Button variant="outline" className="w-full justify-start">
               <Shield className="mr-2 h-4 w-4" />
