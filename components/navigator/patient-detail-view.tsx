@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -28,11 +28,63 @@ interface Patient {
 }
 
 interface PatientDetailViewProps {
-  patient: Patient
+  patientId: string
+  onBack?: () => void
 }
 
-export function PatientDetailView({ patient }: PatientDetailViewProps) {
+export function PatientDetailView({ patientId, onBack }: PatientDetailViewProps) {
+  const [patient, setPatient] = useState<Patient | null>(null)
+  const [loading, setLoading] = useState(true)
   const [date, setDate] = useState<Date | undefined>(new Date())
+
+  useEffect(() => {
+    // Simulate fetching patient data
+    const fetchPatient = async () => {
+      setLoading(true)
+      try {
+        // In a real app, you would fetch from an API
+        // For now, we'll simulate with mock data
+        const mockPatient: Patient = {
+          id: patientId,
+          name: "Maria Popescu",
+          age: 42,
+          gender: "Feminin",
+          address: "Str. Primăverii 15, București",
+          phone: "0712345678",
+          email: "maria.popescu@example.com",
+        }
+
+        setTimeout(() => {
+          setPatient(mockPatient)
+          setLoading(false)
+        }, 500)
+      } catch (error) {
+        console.error("Error fetching patient:", error)
+        setLoading(false)
+      }
+    }
+
+    fetchPatient()
+  }, [patientId])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-500">Se încarcă datele pacientului...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!patient) {
+    return (
+      <div className="p-4 border rounded-md bg-red-50 text-red-700">
+        Nu s-au putut încărca datele pacientului. Vă rugăm încercați din nou.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
