@@ -34,21 +34,6 @@ interface PatientDetailViewProps {
 export function PatientDetailView({ patient }: PatientDetailViewProps) {
   const [date, setDate] = useState<Date | undefined>(new Date())
 
-  // Add error handling for missing patient data
-  if (!patient) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Detalii Pacient</CardTitle>
-          <CardDescription>Nu s-au putut încărca datele pacientului.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p>Vă rugăm să încercați din nou sau contactați suportul tehnic.</p>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <div className="space-y-4">
       <Card>
@@ -59,8 +44,8 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         <CardContent className="grid gap-4">
           <div className="flex items-center space-x-4">
             <Avatar>
-              <AvatarImage src={patient.avatarUrl || "/placeholder.svg"} alt={`Fotografie profil ${patient.name}`} />
-              <AvatarFallback aria-label={`Inițiale ${patient.name}`}>{patient.name.substring(0, 2)}</AvatarFallback>
+              <AvatarImage src={patient.avatarUrl || "/placeholder.svg"} />
+              <AvatarFallback>{patient.name.substring(0, 2)}</AvatarFallback>
             </Avatar>
             <div>
               <p className="text-lg font-semibold">{patient.name}</p>
@@ -72,41 +57,23 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
           <Separator />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="patient-address">Adresă</Label>
-              <Input
-                id="patient-address"
-                type="text"
-                value={patient.address}
-                readOnly
-                aria-label="Adresa pacientului"
-              />
+              <Label>Adresă</Label>
+              <Input type="text" value={patient.address} readOnly />
             </div>
             <div>
-              <Label htmlFor="patient-phone">Telefon</Label>
-              <Input
-                id="patient-phone"
-                type="tel"
-                value={patient.phone}
-                readOnly
-                aria-label="Numărul de telefon al pacientului"
-              />
+              <Label>Telefon</Label>
+              <Input type="tel" value={patient.phone} readOnly />
             </div>
             <div>
-              <Label htmlFor="patient-email">Email</Label>
-              <Input
-                id="patient-email"
-                type="email"
-                value={patient.email}
-                readOnly
-                aria-label="Adresa de email a pacientului"
-              />
+              <Label>Email</Label>
+              <Input type="email" value={patient.email} readOnly />
             </div>
           </div>
         </CardContent>
       </Card>
 
       <Tabs defaultValue="general" className="w-full space-y-4">
-        <TabsList aria-label="Secțiuni informații pacient">
+        <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="symptoms">Simptome</TabsTrigger>
           <TabsTrigger value="history">Istoric Medical</TabsTrigger>
@@ -144,11 +111,7 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
           </div>
         </TabsContent>
         <TabsContent value="symptoms" className="space-y-6">
-          {patient && patient.id ? (
-            <EnhancedSymptomsTracker patientId={patient.id} />
-          ) : (
-            <p>Nu se pot încărca simptomele. ID pacient lipsă.</p>
-          )}
+          <EnhancedSymptomsTracker patientId={patient.id} />
         </TabsContent>
         <TabsContent value="history" className="space-y-6">
           <div>
