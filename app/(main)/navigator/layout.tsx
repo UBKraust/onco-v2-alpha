@@ -13,7 +13,7 @@ export default function NavigatorLayout({
       <NavigatorSidebar />
       <SidebarInset>
         <EnhancedHeader />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6 max-w-[1440px] mx-auto">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   )
